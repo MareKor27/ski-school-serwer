@@ -1,13 +1,15 @@
-export type UserData = {
+export type UserDto = {
   id: number;
-  nameSurname: string;
-  password: string;
+
+  name: string;
+
   email: string;
+
   phoneNumber: string;
-  role: string;
+
   informationOne: string;
+
   informationTwo: string;
+
   informationThree: string;
-  createAt: Date;
-  updateAt?: Date;
 };

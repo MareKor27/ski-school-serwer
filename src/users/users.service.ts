@@ -1,176 +1,90 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserData } from './types/userData';
 import { Role } from './types/role';
+import { UserModel } from './models/user.model';
+import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class UsersService {
-  private users: UserData[] = [
-    {
-      id: 1,
-      nameSurname: 'M K',
-      password: '',
-      email: 'mk@wp.pl',
-      phoneNumber: '+48 123 456 781',
-      role: 'ADMIN',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-    {
-      id: 2,
-      nameSurname: 'M J',
-      password: '',
-      email: 'mj@wp.pl',
-      phoneNumber: '+48 123 456 782',
-      role: 'ADMIN',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-    {
-      id: 3,
-      nameSurname: 'Instr 1',
-      password: '',
-      email: 'instr1@wp.pl',
-      phoneNumber: '+48 123 456 783',
-      role: 'INSTRUCTOR',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-    {
-      id: 4,
-      nameSurname: 'Instr 2',
-      password: '',
-      email: 'instr2@wp.pl',
-      phoneNumber: '+48 123 456 784',
-      role: 'INSTRUCTOR',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-    {
-      id: 5,
-      nameSurname: 'Instr 3',
-      password: '',
-      email: 'instr3@wp.pl',
-      phoneNumber: '+48 123 456 785',
-      role: 'INSTRUCTOR',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-    {
-      id: 6,
-      nameSurname: 'clinet 1',
-      password: '',
-      email: 'client@wp.pl',
-      phoneNumber: '+48 123 456 786',
-      role: 'CLIENT',
-      informationOne: '',
-      informationTwo: '',
-      informationThree: '',
-      createAt: new Date('2024-12-19T13:10:00Z'),
-    },
-  ];
+  constructor(
+    @InjectModel(UserModel)
+    private userModel: typeof UserModel,
+  ) {}
 
-  findOne(id: number) {
-    const user = this.users.find((user) => user.id == id);
-    if (!user) throw new NotFoundException('User not found f1');
-    // const { nameSurname, email, phoneNumber } = user;
-    // return { nameSurname, email, phoneNumber };
-    return user;
-  }
-
-  findAll(filters: {
+  async findAll(filters: {
     role?: Role;
-    nameSurname?: string;
+    name?: string;
     email?: string;
-    phoneNumber?: string;
-  }) {
-    return this.users.filter((user) => {
-      let match = true;
+    phone?: string;
+  }): Promise<UserModel[]> {
+    const whereConditions: any = {};
 
-      if (filters.role && user.role !== filters.role) {
-        match = false;
-      }
+    if (filters.role) {
+      whereConditions.role = filters.role;
+    }
 
-      if (
-        filters.nameSurname &&
-        !user.nameSurname
-          .toLowerCase()
-          .includes(filters.nameSurname.toLowerCase())
-      ) {
-        match = false;
-      }
+    if (filters.name) {
+      whereConditions.name = {
+        [Op.iLike]: `%${filters.name}%`,
+      };
+    }
 
-      if (
-        filters.email &&
-        !user.email.toLowerCase().includes(filters.email.toLowerCase())
-      ) {
-        match = false;
-      }
+    if (filters.email) {
+      whereConditions.email = {
+        [Op.like]: `%${filters.email}%`,
+      };
+    }
 
-      if (
-        filters.phoneNumber &&
-        !user.phoneNumber.includes(filters.phoneNumber)
-      ) {
-        match = false;
-      }
+    if (filters.phone) {
+      whereConditions.phone = {
+        [Op.like]: `%${filters.phone}%`,
+      };
+    }
 
-      return match;
+    // Wykonanie zapytania z dynamicznie utworzonymi warunkami
+    return this.userModel.findAll({
+      where: whereConditions,
     });
-
-    // if (filters.role) {
-    //   const rolesArray = this.users.filter(
-    //     (user) => user.role === filters.role,
-    //   );
-    //   if (rolesArray.length === 0)
-    //     throw new NotFoundException('User not found fA');
-    //   return rolesArray;
-    // }
-    // return this.users;
   }
 
-  createOne(createUserDto: CreateUserDto) {
-    //MUST HAVE TO FINAL VERSION - CAPTCHA VALIDATION FROM BOTS
-    const userByHighestId = [...this.users].sort((a, b) => b.id - a.id);
-    const newUser = {
-      id: userByHighestId[0].id + 1,
-      ...createUserDto,
-      createAt: new Date(),
-      //MUST HAVE TO FINAL VERSION - SHA@256
-      password: '123',
-    };
-    this.users.push(newUser);
-    return newUser;
-    //MUST HAVE TO FINAL VERSION - CHECK UNIQUE VALUE OF EMAIL & PHONENUMBER
+  findOne(id: number): Promise<UserModel> {
+    return this.userModel.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
-  updateOne(id: number, updateUserDto: UpdateUserDto) {
-    this.users = this.users.map((user) => {
-      if (user.id == id) {
-        return {
-          ...user,
-          ...updateUserDto,
-          updateAt: new Date(),
-        };
-      }
-      return user;
-    });
-    return this.findOne(id);
+  create(userData: CreateUserDto): Promise<UserModel> {
+    return this.userModel.create(userData);
   }
 
-  deleteOne(id: number) {
-    this.users = this.users.filter((user) => {
-      return user.id !== id;
-    });
+  async updateOne(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserModel> {
+    const [affectedCount, affectedRows] = await this.userModel.update(
+      updateUserDto,
+      {
+        where: { id },
+        returning: true,
+        validate: true,
+      },
+    );
+
+    if (affectedCount === 0) {
+      throw new Error(
+        `User with id ${id} was not found or no changes were made.`,
+      );
+    }
+
+    return affectedRows[0];
+  }
+
+  async delete(id: number): Promise<void> {
+    const user = await this.findOne(id);
+    await user.destroy();
   }
 }

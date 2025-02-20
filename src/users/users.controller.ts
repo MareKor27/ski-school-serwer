@@ -14,33 +14,38 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { Role } from './types/role';
+import { UserModel } from './models/user.model';
+import { UserDto } from './dto/user.dto';
+import { mapUserToDto } from './dto/user.dto.mapper';
 
-@Controller('uzytkownicy')
+@Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findOne(id);
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<UserDto> {
+    const user = await this.userService.findOne(id);
+    const dto = mapUserToDto(user);
+    return dto;
   }
 
   @Get()
-  findAll(
+  readUsers(
     @Query('role') role?: Role,
-    @Query('name') nameSurname?: string,
+    @Query('name') name?: string,
     @Query('email') email?: string,
-    @Query('phone') phoneNumber?: string,
+    @Query('phone') phone?: string,
   ) {
-    return this.userService.findAll({ role, nameSurname, email, phoneNumber });
-  }
+    return this.userService.findAll({ role, name, email, phone: phone });
+  } //TTTTUTUTUTUTUTUTUTUTTAAAAAAJJAJAJAAJAJAJAJAJAJA
 
   @Post()
-  createOne(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    return this.userService.createOne(createUserDto);
+  createUser(@Body(ValidationPipe) userData: CreateUserDto) {
+    return this.userService.create(userData);
   }
 
   @Patch(':id')
-  updateOne(
+  updateUser(
     @Param('id') id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
   ) {
@@ -48,7 +53,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  deleteOne(@Param('id') id: number) {
-    return this.userService.deleteOne(+id);
+  deleteUser(@Param('id') id: number) {
+    return this.userService.delete(id);
   }
 }

@@ -7,12 +7,11 @@ import {
   IsString,
 } from 'class-validator';
 import { Role, roles } from '../types/role';
-import { Transform, Type } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  nameSurname: string;
+  name: string;
 
   password: string;
 
@@ -36,8 +35,4 @@ export class CreateUserDto {
 
   @IsString()
   informationThree: string;
-
-  createAt: Date;
-
-  updateAt?: Date;
 }

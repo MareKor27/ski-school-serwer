@@ -1,26 +1,19 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { purchasedTime, PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment, chosenEquipment } from '../types/chosenEquipment';
-import { Type } from 'class-transformer';
+import { UserModel } from 'src/users/models/user.model';
 
 export class CreateReservationDto {
   @IsNotEmpty()
-  @IsNumber()
-  idClient: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  idInstructor: number;
-
-  reservationDate: string;
+  clientId: number;
 
   @IsNotEmpty()
   @IsEnum(purchasedTime, { message: 'Bad time chosen' })
   purchasedTime: PurchasedTime;
 
   @IsNotEmpty()
-  @IsString()
-  participants: string;
+  @IsNumber()
+  participants: number;
 
   @IsNotEmpty()
   @IsString()
@@ -39,10 +32,4 @@ export class CreateReservationDto {
 
   @IsString()
   insuranceInformation: string;
-
-  @Type(() => Date)
-  createdAt: string;
-
-  @Type(() => Date)
-  updatedAt: string;
 }
