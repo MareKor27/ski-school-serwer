@@ -6,19 +6,22 @@ import {
   AutoIncrement,
   ForeignKey,
   BelongsTo,
+  Scopes,
+  DataType,
 } from 'sequelize-typescript';
 import { InferAttributes, InferCreationAttributes } from 'sequelize';
 import { UserModel } from 'src/users/models/user.model';
 import { ReservationModel } from 'src/reservations/models/reservation.model';
 import { scopes } from './appointments.model.scopes';
 
+@Scopes(() => scopes)
 @Table({
   timestamps: true,
   tableName: 'Appointments',
 })
 export class AppointmentModel extends Model<
   InferAttributes<AppointmentModel>,
-  InferCreationAttributes<AppointmentModel>
+  InferCreationAttributes<AppointmentModel, { omit: 'id' }>
 > {
   @PrimaryKey
   @AutoIncrement
@@ -30,7 +33,7 @@ export class AppointmentModel extends Model<
   instructorId: number;
 
   @ForeignKey(() => ReservationModel)
-  @Column
+  @Column(DataType.INTEGER)
   reservationId: number | null;
 
   @Column
@@ -45,6 +48,6 @@ export class AppointmentModel extends Model<
 
 export type Appointment = InferAttributes<AppointmentModel>;
 
-Object.entries(scopes).forEach(([name, options]) => {
-  AppointmentModel.addScope(name, options);
-});
+// Object.entries(scopes).forEach(([name, options]) => {
+//   AppointmentModel.addScope(name, options);
+// });

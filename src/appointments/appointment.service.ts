@@ -15,7 +15,7 @@ export class AppointmentService {
     private appointmentModel: typeof AppointmentModel,
   ) {}
 
-  findOne(id: number): Promise<AppointmentModel> {
+  findOne(id: number): Promise<AppointmentModel | null> {
     return this.appointmentModel.scope(AppointmentScope.Populated).findOne({
       where: {
         id,
@@ -24,11 +24,17 @@ export class AppointmentService {
     // if (!appointment) throw new NotFoundException('Avalibilite not found f1');
   }
 
-  findAll(filters: {
-    idInstructor?: number;
-    appointmentDate?: Date;
-    available?: boolean;
-  }): Promise<AppointmentModel[]> {
+  async findAll(
+    filters: {
+      idInstructor?: number;
+      appointmentDate?: Date;
+      available?: boolean;
+    },
+    page: number,
+    size: number,
+  ): Promise<[AppointmentModel[], number]> {
+    const limit = size;
+    const offset = size * (page - 1);
     const whereConditions: any = {};
 
     if (filters.idInstructor) {
@@ -43,7 +49,13 @@ export class AppointmentService {
       whereConditions.available = filters.available;
     }
 
-    return this.appointmentModel.findAll({ where: whereConditions });
+    const result = await this.appointmentModel.findAndCountAll({
+      where: whereConditions,
+      limit,
+      offset,
+    });
+
+    return [result.rows, result.count];
   }
 
   createOne(
@@ -79,6 +91,7 @@ export class AppointmentService {
 
   async deleteOne(id: number): Promise<void> {
     const appointment = await this.findOne(id);
+    if (!appointment) return;
     await appointment.destroy();
   }
 }

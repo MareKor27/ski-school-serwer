@@ -18,12 +18,12 @@ export const scopes = {
       {
         model: ReservationModel,
         as: 'reservation',
-        include: [
-          {
-            model: UserModel,
-            as: 'client',
-          },
-        ],
+        // include: [
+        //   {
+        //     model: UserModel,
+        //     as: 'client',
+        //   },
+        // ],
       },
     ],
   },

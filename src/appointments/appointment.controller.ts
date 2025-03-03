@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -15,6 +16,9 @@ import { CreateAppointmentDto } from './dto/createAppointment.dto';
 import { UpdateAppointmentDto } from './dto/updateAppointment.dto';
 import { AppointmentDto } from './dto/appointment.dto';
 import { mapAppointmentToDto } from './dto/appointment.dto.mapper';
+import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
+import { ResponseDto } from 'src/commons/dto/response.dto';
+import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -23,23 +27,33 @@ export class AppointmentController {
   @Get(':id')
   async getAppointment(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<AppointmentDto> {
+  ): Promise<ResponseDto<AppointmentDto>> {
     const appointment = await this.appointmentService.findOne(id);
+    if (!appointment)
+      throw new NotFoundException(`Reservation with id ${id} not found`);
     const dto = mapAppointmentToDto(appointment);
-    return dto;
+    return buildResponseDto(dto);
   }
 
   @Get()
-  readAppointments(
+  async readAppointments(
     @Query('instruktor') idInstructor?: number,
     @Query('date') appointmentDate?: Date,
     @Query('dostepne') available?: boolean,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
   ) {
-    return this.appointmentService.findAll({
-      idInstructor,
-      appointmentDate,
-      available,
-    });
+    const [appointments, totalRows] = await this.appointmentService.findAll(
+      {
+        idInstructor,
+        appointmentDate,
+        available,
+      },
+      page,
+      size,
+    );
+    const dto = appointments.map(mapAppointmentToDto);
+    return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
 
   @Post()

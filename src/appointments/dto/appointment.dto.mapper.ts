@@ -4,7 +4,8 @@ import { AppointmentDto } from './appointment.dto';
 import { mapReservationToDto } from 'src/reservations/dto/reservation.dto.mapper';
 
 export function mapAppointmentToDto(appointment: Appointment): AppointmentDto {
-  console.log(typeof appointment.reservation);
+  // console.log(typeof appointment.reservation);
+
   return {
     id: appointment.id,
     instructor: appointment.instructor
@@ -12,7 +13,9 @@ export function mapAppointmentToDto(appointment: Appointment): AppointmentDto {
       : { id: appointment.instructorId },
     reservation: appointment.reservation
       ? mapReservationToDto(appointment.reservation)
-      : { id: appointment.reservationId },
+      : appointment.reservationId
+        ? { id: appointment.reservationId }
+        : null,
     appointmentDate: appointment.appointmentDate,
   };
 }
