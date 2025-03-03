@@ -19,20 +19,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @IsPhoneNumber('PL')
-  @IsNotEmpty()
-  phoneNumber: string;
-
   @IsNotEmpty()
   @IsEnum(roles, { message: 'Valid role required' })
   role: Role;
-
-  @IsString()
-  informationOne: string;
-
-  @IsString()
-  informationTwo: string;
-
-  @IsString()
-  informationThree: string;
 }

@@ -13,12 +13,26 @@ export class UsersService {
     private userModel: typeof UserModel,
   ) {}
 
-  async findAll(filters: {
-    role?: Role;
-    name?: string;
-    email?: string;
-    phone?: string;
-  }): Promise<UserModel[]> {
+  findOne(id: number): Promise<UserModel | null> {
+    return this.userModel.findOne({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async findAll(
+    filters: {
+      role?: Role;
+      name?: string;
+      email?: string;
+      phone?: string;
+    },
+    page: number,
+    size: number,
+  ): Promise<[UserModel[], number]> {
+    const limit = size;
+    const offset = size * (page - 1);
     const whereConditions: any = {};
 
     if (filters.role) {
@@ -44,17 +58,13 @@ export class UsersService {
     }
 
     // Wykonanie zapytania z dynamicznie utworzonymi warunkami
-    return this.userModel.findAll({
+    const result = await this.userModel.findAndCountAll({
       where: whereConditions,
+      limit,
+      offset,
     });
-  }
 
-  findOne(id: number): Promise<UserModel> {
-    return this.userModel.findOne({
-      where: {
-        id,
-      },
-    });
+    return [result.rows, result.count];
   }
 
   create(userData: CreateUserDto): Promise<UserModel> {
@@ -85,6 +95,7 @@ export class UsersService {
 
   async delete(id: number): Promise<void> {
     const user = await this.findOne(id);
+    if (!user) return;
     await user.destroy();
   }
 }

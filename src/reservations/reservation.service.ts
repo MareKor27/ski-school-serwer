@@ -20,53 +20,23 @@ export class ReservationService {
       where: {
         id,
       },
-      include: [UserModel],
     });
   }
 
   async findAll(
     page: number,
     size: number,
-
-    // filters: {
-    // client?: UserModel;
-    // purchasedTime?: string;
-    // participants?: number;
-    // advancement?: string;
-    // chosenEquipment?: string;
-    // }
-  ): Promise<ReservationModel[]> {
+  ): Promise<[ReservationModel[], number]> {
     const limit = size;
     const offset = size * (page - 1);
 
-    ////???? jak tutaj wyszukiwać po dacie ? i czy trzeba tutaj?
-    // const whereConditions: any = {};
-
-    // if (filters.client) {
-    //   whereConditions.client = filters.client;
-    // }
-
-    // if (filters.purchasedTime) {
-    //   whereConditions.purchasedTime = filters.purchasedTime;
-    // }
-
-    // if (filters.participants) {
-    //   whereConditions.participants = { [Op.like]: `%${filters.participants}%` };
-    // }
-
-    // if (filters.advancement) {
-    //   whereConditions.advancement = filters.advancement;
-    // }
-
-    // if (filters.chosenEquipment) {
-    //   whereConditions.chosenEquipment = filters.chosenEquipment;
-    // }
-
-    return this.reservationModel.findAll({
+    const result = await this.reservationModel.findAndCountAll({
       // where: whereConditions,
       limit,
       offset,
     });
+
+    return [result.rows, result.count];
   }
 
   createOne(
@@ -95,6 +65,7 @@ export class ReservationService {
 
   async deleteOne(id: number) {
     const reservation = await this.findOne(id);
+    if (!reservation) return;
     await reservation.destroy();
   }
 }

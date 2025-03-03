@@ -1,20 +1,26 @@
+import { BuildCollectionsResponseDtoMetaData } from '../types/buildCollectionsResponseDtoMetaData';
 import { CollectionResponseDto } from './collectionResponse.dto';
 
 export function buildCollectionsResponseDto<Data>(
   data: Data[],
-  metaData: any,
+  metaData: BuildCollectionsResponseDtoMetaData,
 ): CollectionResponseDto<Data> {
+  const lastPage = Math.ceil(metaData.totalRows / metaData.size);
+  const hasNext = metaData.page < lastPage;
+  const hasPrev = metaData.page > 1;
+  const isEmpty = data.length == 0;
+  const isValid = metaData.page <= lastPage && metaData.page >= 1;
   return {
     content: data,
     pagination: {
       page: metaData.page,
       size: metaData.size,
-      lastPage: metaData.lastPage,
       totalRows: metaData.totalRows,
-      hasNext: metaData.hasNext,
-      hasPrev: metaData.hasPrev,
-      isEmpty: metaData.isEmpty,
-      isValid: metaData.isValid,
+      lastPage,
+      hasNext,
+      hasPrev,
+      isEmpty,
+      isValid,
     },
   };
 }

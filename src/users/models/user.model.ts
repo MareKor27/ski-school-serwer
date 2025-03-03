@@ -14,7 +14,7 @@ import { InferAttributes, InferCreationAttributes } from 'sequelize';
 })
 export class UserModel extends Model<
   InferAttributes<UserModel>,
-  InferCreationAttributes<UserModel>
+  InferCreationAttributes<UserModel, { omit: 'id' }>
 > {
   @PrimaryKey
   @AutoIncrement
@@ -31,19 +31,7 @@ export class UserModel extends Model<
   email: string;
 
   @Column
-  phoneNumber: string;
-
-  @Column
   role: Role;
-
-  @Column
-  informationOne: string;
-
-  @Column
-  informationTwo: string;
-
-  @Column
-  informationThree: string;
 }
 
 export type User = InferAttributes<UserModel>;

@@ -4,12 +4,4 @@ export type UserDto = {
   name: string;
 
   email: string;
-
-  phoneNumber: string;
-
-  informationOne: string;
-
-  informationTwo: string;
-
-  informationThree: string;
 };

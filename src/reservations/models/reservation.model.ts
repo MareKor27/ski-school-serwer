@@ -18,16 +18,25 @@ import { ChosenEquipment } from '../types/chosenEquipment';
 })
 export class ReservationModel extends Model<
   InferAttributes<ReservationModel>,
-  InferCreationAttributes<ReservationModel>
+  InferCreationAttributes<ReservationModel, { omit: 'id' }>
 > {
   @PrimaryKey
   @AutoIncrement
   @Column
   id: number;
 
-  @ForeignKey(() => UserModel)
+  // @ForeignKey(() => UserModel)
+  // @Column
+  // clientId: number;
+
   @Column
-  clientId: number;
+  fullName: string;
+
+  @Column
+  email: string;
+
+  @Column
+  phoneNumber: string;
 
   @Column
   purchasedTime: PurchasedTime;
@@ -50,10 +59,8 @@ export class ReservationModel extends Model<
   @Column
   insuranceInformation: string;
 
-  @BelongsTo(() => UserModel)
-  client?: UserModel;
-
-  sierotkaMarysia: any;
+  // @BelongsTo(() => UserModel)
+  // client?: UserModel;
 }
 
 export type Reservation = InferAttributes<ReservationModel>;

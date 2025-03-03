@@ -6,7 +6,13 @@ import { EmptyDto } from 'src/commons/dto/empty.dto';
 export type ReservationDto = {
   id: number;
 
-  client: UserDto | EmptyDto;
+  // client: UserDto | EmptyDto;
+
+  fullName: string;
+
+  email: string;
+
+  phoneNumber: string;
 
   purchasedTime: PurchasedTime;
 

@@ -3,11 +3,13 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  Res,
   ValidationPipe,
 } from '@nestjs/common';
 
@@ -20,6 +22,7 @@ import { mapReservationToDto } from './dto/reservation.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
+import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 
 @Controller('reservation')
 export class ReservationController {
@@ -30,23 +33,27 @@ export class ReservationController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseDto<ReservationDto>> {
     const reservation = await this.reservationService.findOne(id);
+    if (!reservation)
+      throw new NotFoundException(`Reservation with id ${id} not found`);
     const dto = mapReservationToDto(reservation);
     return buildResponseDto(dto);
   }
 
   @Get()
-  readReservations(
-    @Query('page') page?: number,
-    @Query('size') size?: number,
+  async readReservations(
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
     // @Query('participants') participants?: number,
     // @Query('advancement') advancement?: string,
     // @Query('chosenEquipment') chosenEquipment?: string,
   ): Promise<CollectionResponseDto<ReservationDto>> {
-    return this.reservationService.findAll(page, size);
+    const [reservations, totalRows] = await this.reservationService.findAll(
+      page,
+      size,
+    );
+    const dto = reservations.map(mapReservationToDto);
+    return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
-
-  // // Rozgraniczenie tego wyżej na jeszcze jeden end-point z samą datą w której było by to rozbite na
-  // // rok, miesiąc, dzień tygodnia, godzina
 
   @Post()
   createReservation(

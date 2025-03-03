@@ -5,9 +5,12 @@ import { ReservationDto } from './reservation.dto';
 export function mapReservationToDto(reservation: Reservation): ReservationDto {
   return {
     id: reservation.id,
-    client: reservation.client
-      ? mapUserToDto(reservation.client)
-      : { id: reservation.clientId },
+    // client: reservation.client
+    //   ? mapUserToDto(reservation.client)
+    //   : { id: reservation.clientId },
+    fullName: reservation.fullName,
+    email: reservation.email,
+    phoneNumber: reservation.phoneNumber,
     purchasedTime: reservation.purchasedTime,
     participants: reservation.participants,
     ageOfParticipants: reservation.ageOfParticipants,

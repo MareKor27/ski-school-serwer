@@ -4,8 +4,20 @@ import { ChosenEquipment, chosenEquipment } from '../types/chosenEquipment';
 import { UserModel } from 'src/users/models/user.model';
 
 export class CreateReservationDto {
+  // @IsNotEmpty()
+  // clientId: number;
+
   @IsNotEmpty()
-  clientId: number;
+  @IsString()
+  fullName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phoneNumber: string;
 
   @IsNotEmpty()
   @IsEnum(purchasedTime, { message: 'Bad time chosen' })
