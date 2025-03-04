@@ -21,6 +21,7 @@ import { mapUserToDto } from './dto/user.dto.mapper';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
+import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 
 @Controller('users')
 export class UsersController {
@@ -44,7 +45,7 @@ export class UsersController {
     @Query('phone') phone?: string,
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
-  ) {
+  ): Promise<CollectionResponseDto<UserDto>> {
     const [users, totalRows] = await this.userService.findAll(
       {
         role,
@@ -60,20 +61,26 @@ export class UsersController {
   } //TTTTUTUTUTUTUTUTUTUTTAAAAAAJJAJAJAAJAJAJAJAJAJA
 
   @Post()
-  createUser(@Body(ValidationPipe) userData: CreateUserDto) {
-    return this.userService.create(userData);
+  async createUser(@Body(ValidationPipe) userData: CreateUserDto) {
+    const user = await this.userService.create(userData);
+    const message = `User with id:${user.id} successfully created`;
+    return buildResponseDto(user, message);
   }
 
   @Patch(':id')
-  updateUser(
+  async updateUser(
     @Param('id') id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updateOne(id, updateUserDto);
+    const user = await this.userService.updateOne(id, updateUserDto);
+    const message = `User with id:${user.id} successfully updated`;
+    return buildResponseDto(user, message);
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: number) {
-    return this.userService.delete(id);
+  async deleteUser(@Param('id') id: number): Promise<ResponseDto<UserDto>> {
+    const user = await this.userService.delete(id);
+    const message = `User with id:${user.id} successfully deleted`;
+    return buildResponseDto(user, message);
   }
 }

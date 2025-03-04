@@ -93,9 +93,12 @@ export class UsersService {
     return affectedRows[0];
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number): Promise<UserModel> {
     const user = await this.findOne(id);
-    if (!user) return;
+    if (!user) {
+      throw new Error('User not found');
+    }
     await user.destroy();
+    return user;
   }
 }

@@ -41,20 +41,21 @@ export class AppointmentService {
       whereConditions.instructor = filters.idInstructor;
     }
 
-    const dateConditions: any = {};
-
-    whereConditions.availabilityDate = dateConditions;
+    if (filters.appointmentDate) {
+      const dateConditions: any = {};
+      whereConditions.availabilityDate = dateConditions;
+    }
 
     if (filters.available) {
       whereConditions.available = filters.available;
     }
-
-    const result = await this.appointmentModel.findAndCountAll({
-      where: whereConditions,
-      limit,
-      offset,
-    });
-
+    const result = await this.appointmentModel
+      .scope(AppointmentScope.Populated)
+      .findAndCountAll({
+        where: whereConditions,
+        limit,
+        offset,
+      });
     return [result.rows, result.count];
   }
 
@@ -82,16 +83,19 @@ export class AppointmentService {
 
     if (affectedCount === 0) {
       throw new Error(
-        `User with id ${id} was not found or no changes were made.`,
+        `Appointment with id ${id} was not found or no changes were made.`,
       );
     }
 
     return affectedRows[0];
   }
 
-  async deleteOne(id: number): Promise<void> {
+  async deleteOne(id: number): Promise<AppointmentModel> {
     const appointment = await this.findOne(id);
-    if (!appointment) return;
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
     await appointment.destroy();
+    return appointment;
   }
 }

@@ -56,16 +56,19 @@ export class ReservationService {
 
     if (affectedCount === 0) {
       throw new Error(
-        `User with id ${id} was not found or no changes were made.`,
+        `Reservation with id ${id} was not found or no changes were made.`,
       );
     }
 
     return affectedRows[0];
   }
 
-  async deleteOne(id: number) {
+  async deleteOne(id: number): Promise<ReservationModel> {
     const reservation = await this.findOne(id);
-    if (!reservation) return;
+    if (!reservation) {
+      throw new Error('Reservation not found');
+    }
     await reservation.destroy();
+    return reservation;
   }
 }

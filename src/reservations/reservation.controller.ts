@@ -16,7 +16,6 @@ import {
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/createReservation.dto';
 import { UpdateReservationDto } from './dto/updateReservation.dto';
-import { UserModel } from 'src/users/models/user.model';
 import { ReservationDto } from './dto/reservation.dto';
 import { mapReservationToDto } from './dto/reservation.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
@@ -43,9 +42,6 @@ export class ReservationController {
   async readReservations(
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
-    // @Query('participants') participants?: number,
-    // @Query('advancement') advancement?: string,
-    // @Query('chosenEquipment') chosenEquipment?: string,
   ): Promise<CollectionResponseDto<ReservationDto>> {
     const [reservations, totalRows] = await this.reservationService.findAll(
       page,
@@ -56,22 +52,32 @@ export class ReservationController {
   }
 
   @Post()
-  createReservation(
+  async createReservation(
     @Body(ValidationPipe) createReservationDto: CreateReservationDto,
   ) {
-    return this.reservationService.createOne(createReservationDto);
+    const reservations =
+      await this.reservationService.createOne(createReservationDto);
+    const message = `Reservations with id:${reservations.id} successfully create`;
+    return buildResponseDto(reservations, message);
   }
 
   @Patch(':id')
-  updateReservation(
+  async updateReservation(
     @Param('id') id: number,
     @Body(ValidationPipe) updateReservationDto: UpdateReservationDto,
   ) {
-    return this.reservationService.updateOne(id, updateReservationDto);
+    const reservations = await this.reservationService.updateOne(
+      id,
+      updateReservationDto,
+    );
+    const message = `Reservations with id:${reservations.id} successfully update`;
+    return buildResponseDto(reservations, message);
   }
 
   @Delete(':id')
-  deleteReservation(@Param('id') id: number) {
-    return this.reservationService.deleteOne(+id);
+  async deleteReservation(@Param('id') id: number) {
+    const reservations = await this.reservationService.deleteOne(+id);
+    const message = `Reservations with id:${reservations.id} successfully delate`;
+    return buildResponseDto(reservations, message);
   }
 }

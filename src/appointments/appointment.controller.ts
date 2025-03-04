@@ -19,6 +19,8 @@ import { mapAppointmentToDto } from './dto/appointment.dto.mapper';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
+import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
+import { ReservationDto } from 'src/reservations/dto/reservation.dto';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -42,7 +44,7 @@ export class AppointmentController {
     @Query('dostepne') available?: boolean,
     @Query('page') page: number = 1,
     @Query('size') size: number = 10,
-  ) {
+  ): Promise<CollectionResponseDto<AppointmentDto>> {
     const [appointments, totalRows] = await this.appointmentService.findAll(
       {
         idInstructor,
@@ -53,26 +55,38 @@ export class AppointmentController {
       size,
     );
     const dto = appointments.map(mapAppointmentToDto);
+
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
 
   @Post()
-  createAppointment(
+  async createAppointment(
     @Body(ValidationPipe) createAvailabilityDto: CreateAppointmentDto,
   ) {
-    return this.appointmentService.createOne(createAvailabilityDto);
+    const appointment = await this.appointmentService.createOne(
+      createAvailabilityDto,
+    );
+    const message = `Appointment with id:${appointment.id} successfully created`;
+    return buildResponseDto(appointment, message);
   }
 
   @Patch(':id')
-  updateAppointment(
+  async updateAppointment(
     @Param('id') id: number,
     @Body(ValidationPipe) updateAvailabilityDto: UpdateAppointmentDto,
   ) {
-    return this.appointmentService.updateOne(id, updateAvailabilityDto);
+    const appointment = await this.appointmentService.updateOne(
+      id,
+      updateAvailabilityDto,
+    );
+    const message = `Appointment with id:${appointment.id} successfully updated`;
+    return buildResponseDto(appointment, message);
   }
 
   @Delete(':id')
-  deleteAppointment(@Param('id') id: number) {
-    return this.appointmentService.deleteOne(+id);
+  async deleteAppointment(@Param('id') id: number) {
+    const appointment = await this.appointmentService.deleteOne(+id);
+    const message = `Appointment with id:${appointment.id} successfully delate`;
+    return buildResponseDto(appointment, message);
   }
 }
