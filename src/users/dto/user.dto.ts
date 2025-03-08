@@ -4,4 +4,6 @@ export type UserDto = {
   name: string;
 
   email: string;
+
+  role: string;
 };
