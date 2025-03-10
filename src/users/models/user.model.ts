@@ -21,13 +21,13 @@ export class UserModel extends Model<
   @Column
   id: number;
 
-  @Column
+  @Column({ allowNull: false })
   name: string;
 
-  @Column
+  @Column({ allowNull: false })
   password: string;
 
-  @Column
+  @Column({ unique: true, allowNull: false })
   email: string;
 
   @Column

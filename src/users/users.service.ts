@@ -5,6 +5,7 @@ import { Role } from './types/role';
 import { UserModel } from './models/user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,21 @@ export class UsersService {
     @InjectModel(UserModel)
     private userModel: typeof UserModel,
   ) {}
+
+  async findByEmail(email: string): Promise<UserModel | null> {
+    return this.userModel.findOne({ where: { email } });
+  }
+
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserModel | null> {
+    const user = await this.findByEmail(email);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
+    }
+    return null;
+  }
 
   findOne(id: number): Promise<UserModel | null> {
     return this.userModel.findOne({
