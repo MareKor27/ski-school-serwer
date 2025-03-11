@@ -9,6 +9,8 @@ import {
   Patch,
   Post,
   Query,
+  Request,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +24,7 @@ import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UsersController {
@@ -68,10 +71,13 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
   async updateUser(
     @Param('id') id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+    @Request() req,
   ) {
+    console.log(req.user);
     const user = await this.userService.updateOne(id, updateUserDto);
     const message = `User with id:${user.id} successfully updated`;
     return buildResponseDto(user, message);

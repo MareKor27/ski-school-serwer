@@ -83,7 +83,8 @@ export class UsersService {
     return [result.rows, result.count];
   }
 
-  create(userData: CreateUserDto): Promise<UserModel> {
+  async create(userData: CreateUserDto): Promise<UserModel> {
+    userData.password = await bcrypt.hash(userData.password, 10);
     return this.userModel.create(userData);
   }
 
