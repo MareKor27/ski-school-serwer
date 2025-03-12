@@ -25,8 +25,10 @@ import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles, RolesGuard } from 'src/roles-guard/roles-guard';
 
 @Controller('users')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
@@ -71,13 +73,11 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('ADMIN')
   async updateUser(
     @Param('id') id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
-    @Request() req,
   ) {
-    console.log(req.user);
     const user = await this.userService.updateOne(id, updateUserDto);
     const message = `User with id:${user.id} successfully updated`;
     return buildResponseDto(user, message);
