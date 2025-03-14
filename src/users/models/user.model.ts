@@ -4,6 +4,7 @@ import {
   Model,
   Table,
   AutoIncrement,
+  Unique,
 } from 'sequelize-typescript';
 import { Role } from '../types/role';
 import { InferAttributes, InferCreationAttributes } from 'sequelize';
@@ -27,7 +28,8 @@ export class UserModel extends Model<
   @Column({ allowNull: false })
   password: string;
 
-  @Column({ unique: true, allowNull: false })
+  @Unique
+  @Column({ allowNull: false })
   email: string;
 
   @Column

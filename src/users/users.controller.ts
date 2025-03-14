@@ -25,7 +25,7 @@ import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Roles, RolesGuard } from 'src/roles-guard/roles-guard';
+import { Roles, RolesGuard } from 'src/commons/middleware/roles-guard';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -43,6 +43,7 @@ export class UsersController {
   }
 
   @Get()
+  @Roles('ADMIN')
   async readUsers(
     @Query('role') role?: Role,
     @Query('name') name?: string,
@@ -66,6 +67,7 @@ export class UsersController {
   } //TTTTUTUTUTUTUTUTUTUTTAAAAAAJJAJAJAAJAJAJAJAJAJA
 
   @Post()
+  @Roles('ADMIN', 'INSTRUCTOR')
   async createUser(@Body(ValidationPipe) userData: CreateUserDto) {
     const user = await this.userService.create(userData);
     const message = `User with id:${user.id} successfully created`;
@@ -73,7 +75,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'INSTRUCTOR')
   async updateUser(
     @Param('id') id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
@@ -84,6 +86,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @Roles('ADMIN')
   async deleteUser(@Param('id') id: number): Promise<ResponseDto<UserDto>> {
     const user = await this.userService.delete(id);
     const message = `User with id:${user.id} successfully deleted`;
