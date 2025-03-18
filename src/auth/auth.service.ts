@@ -4,10 +4,11 @@ import { UsersService } from 'src/users/users.service';
 import { LoginResponeType, UserData } from './type/auth';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
-import { PasswordResetRequestModel } from './model/password-reset-equest.model';
+import { PasswordResetRequestModel } from './model/password-reset-request.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { PasswordResetRequestType } from './type/password-reset-equest';
+import { Op } from 'sequelize';
 import * as crypto from 'crypto';
+import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -38,7 +39,7 @@ export class AuthService {
   }
 
   async createPasswordResetRequest(userId: number, email: string) {
-    const token = crypto.randomBytes(16).toString('base64');
+    const token = crypto.randomBytes(16).toString('base64url');
     const date = new Date();
     date.setMinutes(date.getMinutes() + 30);
     await this.passwordResetRequest.create({ userId, token, exp: date });
@@ -58,22 +59,52 @@ export class AuthService {
     return { message: 'User registered successfully', user };
   }
 
+  async forgotPassword(email: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) return;
+    this.createPasswordResetRequest(user.id, email);
+  }
+
   async sendEmail(email: string, token: string) {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
       },
     });
 
-    const url = `http://localhost:5173/reset-password/${token}`;
+    const url = `http://localhost:5173/administrator/zmien-haslo/${token}`;
 
     await transporter.sendMail({
       from: process.env.MAIL_USER,
       to: email,
-      subject: 'Ustaw swoje hasło',
-      html: `<p>Kliknij poniższy link, aby ustawić hasło:</p><a href="${url}">Ustaw hasło</a>`,
+      subject: 'FigowskiSport - Ustaw swoje hasło',
+      html: `<h1>Witaj!</h1><h2>Zostało stworzone konto Instruktora</h2><p>Kliknij poniższy link, aby ustawić hasło:</p><a href="${url}">${url}</a>`,
     });
+  }
+
+  async resetPassword(newPassword: string, token: string) {
+    const responseToken = await this.passwordResetRequest.findOne({
+      where: { token, exp: { [Op.gt]: new Date() } },
+    });
+    //if response null błąd i return
+    if (responseToken) {
+      const userId = responseToken?.userId;
+      const responseUser = await this.userService.findOneUser(userId);
+      if (responseUser) {
+        const newHashPassword = await bcrypt.hash(newPassword, 10);
+        const userWithNewPassword: UpdateUserDto = {
+          name: responseUser.name,
+          password: newHashPassword,
+          email: responseUser.email,
+          role: responseUser.role,
+        };
+        await this.userService.updateOne(userId, userWithNewPassword);
+        await responseToken.destroy();
+      }
+    }
   }
 }

@@ -29,7 +29,7 @@ export class UsersService {
     return null;
   }
 
-  findOne(id: number): Promise<UserModel | null> {
+  findOneUser(id: number): Promise<UserModel | null> {
     return this.userModel.findOne({
       where: {
         id,
@@ -110,7 +110,7 @@ export class UsersService {
   }
 
   async delete(id: number): Promise<UserModel> {
-    const user = await this.findOne(id);
+    const user = await this.findOneUser(id);
     if (!user) {
       throw new Error('User not found');
     }

@@ -36,7 +36,7 @@ export class UsersController {
   async getUser(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseDto<UserDto>> {
-    const user = await this.userService.findOne(id);
+    const user = await this.userService.findOneUser(id);
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
     const dto = mapUserToDto(user);
     return buildResponseDto(dto);

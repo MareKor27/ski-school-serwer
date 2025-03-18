@@ -4,12 +4,14 @@ import { ReservationModule } from './reservations/reservation.module';
 import { AppointmentModule } from './appointments/appointment.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     ReservationModule,
     AppointmentModule,
+    AuthModule,
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: 'localhost',
@@ -20,7 +22,9 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true,
       autoLoadModels: true,
     }),
-    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
 })
 export class AppModule {}

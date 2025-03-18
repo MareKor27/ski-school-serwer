@@ -9,6 +9,7 @@ import {
 import { InferAttributes, InferCreationAttributes } from 'sequelize';
 
 @Table({
+  timestamps: true,
   tableName: 'PasswordResetRequests',
 })
 export class PasswordResetRequestModel extends Model<
