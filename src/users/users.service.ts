@@ -112,7 +112,7 @@ export class UsersService {
   async delete(id: number): Promise<UserModel> {
     const user = await this.findOneUser(id);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('User not found xddd');
     }
     await user.destroy();
     return user;
