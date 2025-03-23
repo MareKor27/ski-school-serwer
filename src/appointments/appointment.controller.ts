@@ -9,6 +9,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
@@ -21,6 +23,10 @@ import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { ReservationDto } from 'src/reservations/dto/reservation.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/commons/middleware/roles-guard';
+import { Actor } from 'src/commons/provider/actor.decorator';
+import { UserDto } from 'src/users/dto/user.dto';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -30,10 +36,21 @@ export class AppointmentController {
   async getAppointment(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ResponseDto<AppointmentDto>> {
-    const appointment = await this.appointmentService.findOne(id);
+    const appointment = await this.appointmentService.findAppointmentById(id);
     if (!appointment)
       throw new NotFoundException(`Reservation with id ${id} not found`);
     const dto = mapAppointmentToDto(appointment);
+    return buildResponseDto(dto);
+  }
+
+  @Get('between/:start/:end')
+  async readAppointmentsBetweenDates(
+    @Param('start') start: Date,
+    @Param('end') end: Date,
+  ): Promise<ResponseDto<AppointmentDto[]>> {
+    const appointments =
+      await this.appointmentService.findAppointmentsBetweenDates(start, end);
+    const dto = appointments.map(mapAppointmentToDto);
     return buildResponseDto(dto);
   }
 
@@ -59,12 +76,30 @@ export class AppointmentController {
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
 
+  //Administrator Create apointment for users
+  //ADD GUARD !!!!!!!!!!!!!!!
+  @Post('/instructor/:id')
+  async createAppointmentForInstructor(
+    @Body(ValidationPipe) createAvailabilityDto: CreateAppointmentDto,
+    @Param('id') id: number,
+  ) {
+    const appointment = await this.appointmentService.createAppointment(
+      id,
+      createAvailabilityDto.appointmentDate,
+    );
+    const message = `Appointment with id:${appointment.id} successfully created`;
+    return buildResponseDto(appointment, message);
+  }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   async createAppointment(
     @Body(ValidationPipe) createAvailabilityDto: CreateAppointmentDto,
+    @Actor() user: UserDto,
   ) {
-    const appointment = await this.appointmentService.createOne(
-      createAvailabilityDto,
+    const appointment = await this.appointmentService.createAppointment(
+      user.id,
+      createAvailabilityDto.appointmentDate,
     );
     const message = `Appointment with id:${appointment.id} successfully created`;
     return buildResponseDto(appointment, message);

@@ -15,13 +15,22 @@ export class AppointmentService {
     private appointmentModel: typeof AppointmentModel,
   ) {}
 
-  findOne(id: number): Promise<AppointmentModel | null> {
+  findAppointmentById(id: number): Promise<AppointmentModel | null> {
     return this.appointmentModel.scope(AppointmentScope.Populated).findOne({
       where: {
         id,
       },
     });
-    // if (!appointment) throw new NotFoundException('Avalibilite not found f1');
+  }
+
+  async findAppointmentsBetweenDates(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<AppointmentModel[]> {
+    const result = await this.appointmentModel.findAndCountAll({
+      where: { appointmentDate: { [Op.gte]: startDate, [Op.lte]: endDate } },
+    });
+    return result.rows;
   }
 
   async findAll(
@@ -59,13 +68,11 @@ export class AppointmentService {
     return [result.rows, result.count];
   }
 
-  createOne(
-    createAppointmentDto: CreateAppointmentDto,
+  createAppointment(
+    instructorId: number,
+    appointmentDate: Date,
   ): Promise<AppointmentModel> {
-    //MUST HAVE TO FINAL VERSION - CAPTCHA VALIDATION FROM BOTS
-    //MUST HAVE TO FINAL VERSION - SHA@256
-    //MUST HAVE TO FINAL VERSION - CHECK UNIQUE VALUE OF EMAIL & PHONENUMBER
-    return this.appointmentModel.create(createAppointmentDto);
+    return this.appointmentModel.create({ instructorId, appointmentDate });
   }
 
   async updateOne(
@@ -91,7 +98,7 @@ export class AppointmentService {
   }
 
   async deleteOne(id: number): Promise<AppointmentModel> {
-    const appointment = await this.findOne(id);
+    const appointment = await this.findAppointmentById(id);
     if (!appointment) {
       throw new Error('Appointment not found');
     }

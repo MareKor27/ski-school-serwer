@@ -36,7 +36,7 @@ export class AppointmentModel extends Model<
   @Column(DataType.INTEGER)
   reservationId: number | null;
 
-  @Column
+  @Column({ type: DataType.DATE, allowNull: false })
   appointmentDate: Date;
 
   @BelongsTo(() => UserModel)
