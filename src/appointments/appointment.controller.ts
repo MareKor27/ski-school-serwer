@@ -91,6 +91,7 @@ export class AppointmentController {
     return buildResponseDto(appointment, message);
   }
 
+  //Instructors creates own appointments
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   async createAppointment(
