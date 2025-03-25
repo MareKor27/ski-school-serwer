@@ -43,13 +43,17 @@ export class AppointmentController {
     return buildResponseDto(dto);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('between/:start/:end')
   async readAppointmentsBetweenDates(
     @Param('start') start: Date,
     @Param('end') end: Date,
+    @Query('user') instructorId?: number,
   ): Promise<ResponseDto<AppointmentDto[]>> {
     const appointments =
-      await this.appointmentService.findAppointmentsBetweenDates(start, end);
+      await this.appointmentService.findAppointmentsBetweenDates(start, end, {
+        instructorId,
+      });
     const dto = appointments.map(mapAppointmentToDto);
     return buildResponseDto(dto);
   }

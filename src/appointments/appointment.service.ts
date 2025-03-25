@@ -26,11 +26,19 @@ export class AppointmentService {
   async findAppointmentsBetweenDates(
     startDate: Date,
     endDate: Date,
+    filters?: { instructorId?: number },
   ): Promise<AppointmentModel[]> {
-    const result = await this.appointmentModel.findAndCountAll({
-      where: { appointmentDate: { [Op.gte]: startDate, [Op.lte]: endDate } },
-    });
-    return result.rows;
+    const whereConditions = {
+      appointmentDate: { [Op.gte]: startDate, [Op.lte]: endDate },
+      ...(filters?.instructorId && { instructorId: filters.instructorId }),
+    };
+
+    const result = await this.appointmentModel
+      .scope(AppointmentScope.Populated)
+      .findAll({
+        where: whereConditions,
+      });
+    return result;
   }
 
   async findAll(
