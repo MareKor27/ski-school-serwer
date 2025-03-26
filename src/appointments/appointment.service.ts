@@ -31,6 +31,7 @@ export class AppointmentService {
     const whereConditions = {
       appointmentDate: { [Op.gte]: startDate, [Op.lte]: endDate },
       ...(filters?.instructorId && { instructorId: filters.instructorId }),
+      reservationId: null,
     };
 
     const result = await this.appointmentModel

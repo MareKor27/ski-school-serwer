@@ -1,4 +1,6 @@
-import { CreateAppointmentDto } from './createAppointment.dto';
-import { PartialType } from '@nestjs/mapped-types';
+import { EmptyDto } from 'src/commons/dto/empty.dto';
+import { ReservationDto } from 'src/reservations/dto/reservation.dto';
 
-export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) {}
+export class UpdateAppointmentDto {
+  reservationId: number | null;
+}

@@ -55,6 +55,7 @@ export class ReservationController {
   async createReservation(
     @Body(ValidationPipe) createReservationDto: CreateReservationDto,
   ) {
+    console.log(createReservationDto);
     const reservations =
       await this.reservationService.createOne(createReservationDto);
     const message = `Reservations with id:${reservations.id} successfully create`;
