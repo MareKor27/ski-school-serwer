@@ -8,5 +8,6 @@ import { AppointmentModel } from './models/appointment.model';
   imports: [SequelizeModule.forFeature([AppointmentModel])],
   controllers: [AppointmentController],
   providers: [AppointmentService],
+  exports: [AppointmentService],
 })
 export class AppointmentModule {}

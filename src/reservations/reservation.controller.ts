@@ -54,10 +54,12 @@ export class ReservationController {
   @Post()
   async createReservation(
     @Body(ValidationPipe) createReservationDto: CreateReservationDto,
+    @Query('appointment') appointmentId: number,
   ) {
-    console.log(createReservationDto);
-    const reservations =
-      await this.reservationService.createOne(createReservationDto);
+    const reservations = await this.reservationService.createOne(
+      createReservationDto,
+      appointmentId,
+    );
     const message = `Reservations with id:${reservations.id} successfully create`;
     return buildResponseDto(reservations, message);
   }

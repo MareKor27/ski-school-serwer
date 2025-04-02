@@ -6,11 +6,14 @@ import {
   AutoIncrement,
   ForeignKey,
   BelongsTo,
+  HasMany,
+  DataType,
 } from 'sequelize-typescript';
 import { InferAttributes, InferCreationAttributes } from 'sequelize';
 import { UserModel } from 'src/users/models/user.model';
 import { PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment } from '../types/chosenEquipment';
+import { AppointmentModel } from 'src/appointments/models/appointment.model';
 
 @Table({
   timestamps: true,
@@ -18,7 +21,7 @@ import { ChosenEquipment } from '../types/chosenEquipment';
 })
 export class ReservationModel extends Model<
   InferAttributes<ReservationModel>,
-  InferCreationAttributes<ReservationModel, { omit: 'id' }>
+  InferCreationAttributes<ReservationModel, { omit: 'id' | 'appointments' }>
 > {
   @PrimaryKey
   @AutoIncrement
@@ -58,6 +61,9 @@ export class ReservationModel extends Model<
 
   @Column
   insuranceInformation: string;
+
+  @HasMany(() => AppointmentModel)
+  appointments: AppointmentModel[];
 
   // @BelongsTo(() => UserModel)
   // client?: UserModel;

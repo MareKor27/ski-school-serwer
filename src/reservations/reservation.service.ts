@@ -3,16 +3,15 @@ import { CreateReservationDto } from './dto/createReservation.dto';
 import { UpdateReservationDto } from './dto/updateReservation.dto';
 import { ReservationModel } from './models/reservation.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { UserModel } from 'src/users/models/user.model';
-import { PurchasedTime } from './types/purchasedTime';
-import { ChosenEquipment } from './types/chosenEquipment';
-import { Op } from 'sequelize';
+import { AppointmentService } from 'src/appointments/appointment.service';
+import { AppointmentModel } from 'src/appointments/models/appointment.model';
 
 @Injectable()
 export class ReservationService {
   constructor(
     @InjectModel(ReservationModel)
     private reservationModel: typeof ReservationModel,
+    private appointmentService: AppointmentService,
   ) {}
 
   findOne(id: number) {
@@ -39,10 +38,21 @@ export class ReservationService {
     return [result.rows, result.count];
   }
 
-  createOne(
+  async createOne(
     createReservationDto: CreateReservationDto,
+    appointmentId: number,
   ): Promise<ReservationModel> {
-    return this.reservationModel.create(createReservationDto);
+    const appointment =
+      await this.appointmentService.findAppointmentById(appointmentId);
+    if (!appointment) throw new Error('Appointment not found'); //TO DO
+
+    const reservation =
+      await this.reservationModel.create(createReservationDto);
+
+    appointment.set('reservationId', reservation.id);
+    await appointment.save();
+
+    return reservation;
   }
 
   async updateOne(
@@ -64,10 +74,17 @@ export class ReservationService {
   }
 
   async deleteOne(id: number): Promise<ReservationModel> {
+    const appointment =
+      await this.appointmentService.findAppointmentByReservationId(id);
+    if (appointment) {
+      await appointment.update({ reservationId: null });
+    }
+
     const reservation = await this.findOne(id);
     if (!reservation) {
       throw new Error('Reservation not found');
     }
+
     await reservation.destroy();
     return reservation;
   }

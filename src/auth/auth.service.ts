@@ -66,24 +66,25 @@ export class AuthService {
   }
 
   async sendEmail(email: string, token: string) {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
+    console.log('poszło');
+    // const transporter = nodemailer.createTransport({
+    //   host: 'smtp.gmail.com',
+    //   port: 465,
+    //   secure: true,
+    //   auth: {
+    //     user: process.env.MAIL_USER,
+    //     pass: process.env.MAIL_PASS,
+    //   },
+    // });
 
-    const url = `http://localhost:5173/administrator/zmien-haslo/${token}`;
+    // const url = `http://localhost:5173/administrator/zmien-haslo/${token}`;
 
-    await transporter.sendMail({
-      from: process.env.MAIL_USER,
-      to: email,
-      subject: 'FigowskiSport - Ustaw swoje hasło',
-      html: `<h1>Witaj!</h1><h2>Zostało stworzone konto Instruktora</h2><p>Kliknij poniższy link, aby ustawić hasło:</p><a href="${url}">${url}</a>`,
-    });
+    // await transporter.sendMail({
+    //   from: process.env.MAIL_USER,
+    //   to: email,
+    //   subject: 'FigowskiSport - Ustaw swoje hasło',
+    //   html: `<h1>Witaj!</h1><h2>Zostało stworzone konto Instruktora</h2><p>Kliknij poniższy link, aby ustawić hasło:</p><a href="${url}">${url}</a>`,
+    // });
   }
 
   async resetPassword(newPassword: string, token: string) {

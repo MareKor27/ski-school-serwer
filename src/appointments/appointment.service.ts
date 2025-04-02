@@ -23,6 +23,16 @@ export class AppointmentService {
     });
   }
 
+  findAppointmentByReservationId(
+    reservationId: number,
+  ): Promise<AppointmentModel | null> {
+    return this.appointmentModel.scope(AppointmentScope.Populated).findOne({
+      where: {
+        reservationId,
+      },
+    });
+  }
+
   async findAppointmentsBetweenDates(
     startDate: Date,
     endDate: Date,
@@ -31,7 +41,7 @@ export class AppointmentService {
     const whereConditions = {
       appointmentDate: { [Op.gte]: startDate, [Op.lte]: endDate },
       ...(filters?.instructorId && { instructorId: filters.instructorId }),
-      reservationId: null,
+      // reservationId: null,
     };
 
     const result = await this.appointmentModel
