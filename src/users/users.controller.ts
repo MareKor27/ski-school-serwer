@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,6 +12,7 @@ import {
   Query,
   Request,
   UseGuards,
+  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -68,7 +70,7 @@ export class UsersController {
 
   @Post()
   @Roles('ADMIN', 'INSTRUCTOR')
-  async createUser(@Body(ValidationPipe) userData: CreateUserDto) {
+  async createUser(@Body() userData: CreateUserDto) {
     const user = await this.userService.create(userData);
     const message = `User with id:${user.id} successfully created`;
     return buildResponseDto(user, message);
@@ -78,7 +80,7 @@ export class UsersController {
   @Roles('ADMIN', 'INSTRUCTOR')
   async updateUser(
     @Param('id') id: number,
-    @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto,
   ) {
     const user = await this.userService.updateOne(id, updateUserDto);
     const message = `User with id:${user.id} successfully updated`;

@@ -84,7 +84,7 @@ export class AppointmentController {
   //ADD GUARD !!!!!!!!!!!!!!!
   @Post('/instructor/:id')
   async createAppointmentForInstructor(
-    @Body(ValidationPipe) createAvailabilityDto: CreateAppointmentDto,
+    @Body() createAvailabilityDto: CreateAppointmentDto,
     @Param('id') id: number,
   ) {
     const appointment = await this.appointmentService.createAppointment(
@@ -99,7 +99,7 @@ export class AppointmentController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   async createAppointment(
-    @Body(ValidationPipe) createAvailabilityDto: CreateAppointmentDto,
+    @Body() createAvailabilityDto: CreateAppointmentDto,
     @Actor() user: UserDto,
   ) {
     const appointment = await this.appointmentService.createAppointment(
@@ -113,7 +113,7 @@ export class AppointmentController {
   @Patch(':id')
   async updateAppointment(
     @Param('id') id: number,
-    @Body(ValidationPipe) updateAvailabilityDto: UpdateAppointmentDto,
+    @Body() updateAvailabilityDto: UpdateAppointmentDto,
   ) {
     const appointment = await this.appointmentService.updateOne(
       id,

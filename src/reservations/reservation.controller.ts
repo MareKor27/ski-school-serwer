@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,6 +11,7 @@ import {
   Post,
   Query,
   Res,
+  UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 
@@ -52,8 +54,13 @@ export class ReservationController {
   }
 
   @Post()
+  @UsePipes(
+    new ValidationPipe({
+      exceptionFactory: (errors) => new BadRequestException(errors),
+    }),
+  )
   async createReservation(
-    @Body(ValidationPipe) createReservationDto: CreateReservationDto,
+    @Body() createReservationDto: CreateReservationDto,
     @Query('appointment') appointmentId: number,
   ) {
     const reservations = await this.reservationService.createOne(
@@ -67,7 +74,7 @@ export class ReservationController {
   @Patch(':id')
   async updateReservation(
     @Param('id') id: number,
-    @Body(ValidationPipe) updateReservationDto: UpdateReservationDto,
+    @Body() updateReservationDto: UpdateReservationDto,
   ) {
     const reservations = await this.reservationService.updateOne(
       id,

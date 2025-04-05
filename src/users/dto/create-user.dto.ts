@@ -5,14 +5,18 @@ import {
   IsNotEmpty,
   IsPhoneNumber,
   IsString,
+  MinLength,
 } from 'class-validator';
 import { Role, roles } from '../types/role';
 
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
+  @MinLength(8, { message: 'name must be at least 8 characters long' })
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
   password: string;
 
   @IsEmail()
