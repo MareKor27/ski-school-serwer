@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ErrorResponseDto } from '../dto/error-response.dto';
+import { statusMessages } from './http-status-messages';
 
 type ValidationIssue = {
   property: string;
@@ -43,7 +44,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = exceptionResponse.message;
       }
     }
+    message = statusMessages[status];
 
+    /// słownik i sprawdzanie po kluczach
     if (typeof exceptionResponse.error === 'string') {
       error = exceptionResponse.error;
     }
