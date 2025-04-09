@@ -3,10 +3,12 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ErrorResponseDto } from '../dto/error-response.dto';
 import { statusMessages } from './http-status-messages';
+import { UniqueConstraintError } from 'sequelize';
 
 type ValidationIssue = {
   property: string;
@@ -63,3 +65,45 @@ export class HttpExceptionFilter implements ExceptionFilter {
     response.status(status).json(errorResponse);
   }
 }
+
+// @Catch(UniqueConstraintError)
+// export class UniqueConstraintExceptionFilter implements ExceptionFilter {
+//   catch(exception: UniqueConstraintError, host: ArgumentsHost) {
+//     const ctx = host.switchToHttp();
+//     const response = ctx.getResponse();
+//     const request = ctx.getRequest<Request>();
+//     const status = HttpStatus.BAD_REQUEST;
+
+//     console.log(exception);
+
+//     let issues: { field: string; message: string }[] = [];
+
+//     if (exception?.fields?.email) {
+//       issues.push({ field: 'email', message: 'Email jest już używany' });
+//     }
+
+//     const newIssue = { field: 'email', message: 'Email jest już używany' };
+
+//     issues = issues ? [...issues, newIssue] : [newIssue];
+
+//     // const message = exception.message;
+
+//     // const emailRegex = /"([^"]+)_email_key"/;
+//     // const match = message.match(emailRegex);
+
+//     // if (match && match[1]) {
+//     //   issues.push({ field: 'email', message: 'Email jest już używany' });
+//     // }
+
+//     const errorResponse: ErrorResponseDto = {
+//       statusCode: status,
+//       message: 'Unique constraint violation',
+//       error: 'Bad Request',
+//       timestamp: new Date().toISOString(),
+//       path: request.url,
+//       issues,
+//     };
+
+//     response.status(status).json(errorResponse);
+//   }
+// }

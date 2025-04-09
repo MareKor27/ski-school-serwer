@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Role, roles } from '../types/role';
+import { Unique } from 'sequelize-typescript';
 
 export class CreateUserDto {
   @IsString()

@@ -29,7 +29,9 @@ export class UserModel extends Model<
   password: string;
 
   @Unique
-  @Column({ allowNull: false })
+  @Column({
+    allowNull: false,
+  })
   email: string;
 
   @Column

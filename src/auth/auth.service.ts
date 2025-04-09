@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 import { PasswordResetRequestModel } from './model/password-reset-request.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 import * as crypto from 'crypto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
 
@@ -47,15 +47,24 @@ export class AuthService {
   }
 
   async register(email: string, name: string) {
+    const isEmail = await this.userService.findByEmail(email);
+
     const randomPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
-    const user = await this.userService.create({
-      email,
-      password: hashedPassword,
-      name,
-      role: 'INSTRUCTOR',
-    });
-    this.createPasswordResetRequest(user.id, email);
+
+    let user;
+    try {
+      user = await this.userService.create({
+        email,
+        password: hashedPassword,
+        name,
+        role: 'INSTRUCTOR',
+      });
+    } catch (error) {
+      console.log(error);
+      console.log(user);
+    }
+    // this.createPasswordResetRequest(user.id, email);
     return { message: 'User registered successfully', user };
   }
 
