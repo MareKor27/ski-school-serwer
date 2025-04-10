@@ -4,6 +4,7 @@ import {
   Controller,
   Param,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,6 +15,10 @@ import {
   RegisterDto,
   ResetPasswordDto,
 } from './dto/auth.dto';
+import { Actor } from 'src/commons/provider/actor.decorator';
+import { UserDto } from 'src/users/dto/user.dto';
+import { UserData } from './type/auth';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -43,5 +48,11 @@ export class AuthController {
       resetPasswordDto.password,
       resetPasswordDto.token,
     );
+  }
+
+  @Post('token')
+  @UseGuards(AuthGuard('jwt'))
+  async loginToken(@Actor() user: UserData) {
+    return this.authService.createNewToken(user);
   }
 }

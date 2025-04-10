@@ -1,7 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
-import { LoginResponeType, UserData } from './type/auth';
+import { AccessToken, LoginResponeType, UserData } from './type/auth';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 import { PasswordResetRequestModel } from './model/password-reset-request.model';
@@ -9,6 +14,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op, UniqueConstraintError } from 'sequelize';
 import * as crypto from 'crypto';
 import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import { ErrorResponseDto } from 'src/commons/dto/error-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,9 +38,23 @@ export class AuthService {
       email: user.email,
       role: user.role,
     };
+    const accessToken = this.jwtService.sign(payload);
+    const decoded: AccessToken = this.jwtService.decode(accessToken);
+
+    return {
+      accessToken,
+      user: payload,
+      expirationDate: new Date(decoded.exp * 1000),
+    };
+  }
+  async createNewToken(payload: UserData): Promise<LoginResponeType> {
+    const accessToken = this.jwtService.sign(payload);
+    const decoded: AccessToken = this.jwtService.decode(accessToken);
+
     return {
       accessToken: this.jwtService.sign(payload),
-      payload,
+      user: payload,
+      expirationDate: new Date(decoded.exp * 1000),
     };
   }
 
@@ -47,7 +67,23 @@ export class AuthService {
   }
 
   async register(email: string, name: string) {
-    const isEmail = await this.userService.findByEmail(email);
+    const isUser = await this.userService.findByEmail(email);
+
+    if (isUser) {
+      throw new HttpException(
+        {
+          message: [
+            {
+              property: 'email',
+              constraints: {
+                isEmail: 'Ten email już jest używany',
+              },
+            },
+          ],
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
 
     const randomPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
@@ -61,10 +97,9 @@ export class AuthService {
         role: 'INSTRUCTOR',
       });
     } catch (error) {
-      console.log(error);
-      console.log(user);
+      throw error;
     }
-    // this.createPasswordResetRequest(user.id, email);
+    this.createPasswordResetRequest(user.id, email);
     return { message: 'User registered successfully', user };
   }
 

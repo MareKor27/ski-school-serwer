@@ -8,5 +8,13 @@ export type UserData = {
 
 export type LoginResponeType = {
   accessToken: string;
-  payload: UserData;
+  user: UserData;
+  expirationDate: Date;
 };
+
+export type JWTFields = {
+  iat: number; // data utworzenia
+  exp: number; // data ważności
+};
+
+export type AccessToken = UserData & JWTFields;

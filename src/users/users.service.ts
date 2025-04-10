@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from './types/role';
@@ -91,14 +96,31 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<UserModel> {
-    const [affectedCount, affectedRows] = await this.userModel.update(
-      updateUserDto,
-      {
-        where: { id },
-        returning: true,
-        validate: true,
-      },
-    );
+    let affectedCount, affectedRows;
+    try {
+      [affectedCount, affectedRows] = await this.userModel.update(
+        updateUserDto,
+        {
+          where: { id },
+          returning: true,
+          validate: true,
+        },
+      );
+    } catch (error) {
+      throw new HttpException(
+        {
+          message: [
+            {
+              property: 'email',
+              constraints: {
+                isEmail: 'Ten email już jest używany',
+              },
+            },
+          ],
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
 
     if (affectedCount === 0) {
       throw new Error(

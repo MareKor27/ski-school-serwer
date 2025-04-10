@@ -27,6 +27,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/commons/middleware/roles-guard';
 import { Actor } from 'src/commons/provider/actor.decorator';
 import { UserDto } from 'src/users/dto/user.dto';
+import { UserData } from 'src/auth/type/auth';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -100,7 +101,7 @@ export class AppointmentController {
   @Post()
   async createAppointment(
     @Body() createAvailabilityDto: CreateAppointmentDto,
-    @Actor() user: UserDto,
+    @Actor() user: UserData,
   ) {
     const appointment = await this.appointmentService.createAppointment(
       user.id,
