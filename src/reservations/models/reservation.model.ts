@@ -42,7 +42,7 @@ export class ReservationModel extends Model<
   phoneNumber: string;
 
   @Column
-  purchasedTime: PurchasedTime;
+  purchasedTime: number;
 
   @Column
   participants: number;

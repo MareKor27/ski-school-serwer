@@ -1,7 +1,7 @@
 export const PurchasedTime = {
-  PurchasedOneHour: 'ONEHOUR',
-  PurchasedTwoHour: 'TWOHOUR',
-  PurchasedThreeHour: 'THREEHOUR',
+  PurchasedOneHour: 'HOUR1',
+  PurchasedTwoHour: 'HOUR2',
+  PurchasedThreeHour: 'HOUR3',
 } as const;
 
 export type PurchasedTime = (typeof PurchasedTime)[keyof typeof PurchasedTime];

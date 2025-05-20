@@ -20,8 +20,8 @@ export class CreateReservationDto {
   phoneNumber: string;
 
   @IsNotEmpty()
-  @IsEnum(purchasedTime, { message: 'Bad time chosen' })
-  purchasedTime: PurchasedTime;
+  @IsNumber()
+  purchasedTime: number;
 
   @IsNotEmpty()
   @IsNumber()
