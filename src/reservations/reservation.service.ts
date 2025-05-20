@@ -5,6 +5,9 @@ import { ReservationModel } from './models/reservation.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { AppointmentService } from 'src/appointments/appointment.service';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
+import { ReservationBodyDto } from './dto/reservation.dto';
+
+const SERVER_OPTION_MAX_LESSON_TIME = 3;
 
 @Injectable()
 export class ReservationService {
@@ -39,20 +42,39 @@ export class ReservationService {
   }
 
   async createOne(
-    createReservationDto: CreateReservationDto,
-    appointmentId: number,
+    reservationBodyDto: ReservationBodyDto,
   ): Promise<ReservationModel> {
-    const appointment =
-      await this.appointmentService.findAppointmentById(appointmentId);
-    if (!appointment) throw new Error('Appointment not found'); //TO DO
+    try {
+      const appointmentsFromIds: Promise<AppointmentModel | null>[] =
+        reservationBodyDto.filteredReservationAppoitmentsIds.map((id) =>
+          this.appointmentService.findAppointmentById(id),
+        );
 
-    const reservation =
-      await this.reservationModel.create(createReservationDto);
+      const appointments = await Promise.all(appointmentsFromIds);
+      // console.log(appointments);
 
-    appointment.set('reservationId', reservation.id);
-    await appointment.save();
+      const areAllAvailable = appointments.every(
+        (appointment) => appointment && appointment.reservation == null,
+      );
 
-    return reservation;
+      if (!areAllAvailable) {
+        throw new Error('One or more appointments are already reserved.');
+      }
+
+      const reservation = await this.reservationModel.create(
+        reservationBodyDto.reservation,
+      );
+
+      for (const appointment of appointments) {
+        if (appointment) {
+          appointment.set('reservationId', reservation.id);
+          await appointment.save();
+        }
+      }
+      return reservation;
+    } catch (error) {
+      throw new Error('server error');
+    }
   }
 
   async updateOne(
@@ -74,15 +96,17 @@ export class ReservationService {
   }
 
   async deleteOne(id: number): Promise<ReservationModel> {
-    const appointment =
-      await this.appointmentService.findAppointmentByReservationId(id);
-    if (appointment) {
-      await appointment.update({ reservationId: null });
-    }
-
     const reservation = await this.findOne(id);
     if (!reservation) {
       throw new Error('Reservation not found');
+    }
+
+    const appointments =
+      await this.appointmentService.findAppointmentByReservationId(id);
+
+    for (const appointment of appointments) {
+      console.log(appointment.id);
+      await appointment.update({ reservationId: null });
     }
 
     await reservation.destroy();

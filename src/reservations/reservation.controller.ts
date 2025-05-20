@@ -18,12 +18,13 @@ import {
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/createReservation.dto';
 import { UpdateReservationDto } from './dto/updateReservation.dto';
-import { ReservationDto } from './dto/reservation.dto';
+import { ReservationBodyDto, ReservationDto } from './dto/reservation.dto';
 import { mapReservationToDto } from './dto/reservation.dto.mapper';
 import { ResponseDto } from 'src/commons/dto/response.dto';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
+import { PaginationQueryDto } from '../commons/dto/paginationQueryDto.dto';
 
 @Controller('reservation')
 export class ReservationController {
@@ -42,32 +43,37 @@ export class ReservationController {
 
   @Get()
   async readReservations(
-    @Query('page') page: number = 1,
-    @Query('size') size: number = 10,
+    @Query() query: PaginationQueryDto,
   ): Promise<CollectionResponseDto<ReservationDto>> {
+    const { page, size } = query;
+
     const [reservations, totalRows] = await this.reservationService.findAll(
       page,
       size,
     );
     const dto = reservations.map(mapReservationToDto);
-    return buildCollectionsResponseDto(dto, { page, size, totalRows });
+    return buildCollectionsResponseDto(dto, {
+      page,
+      size,
+      totalRows,
+    });
   }
 
+  // @UsePipes(
+  //   new ValidationPipe({
+  //     exceptionFactory: (errors) => new BadRequestException(errors),
+  //   }),
+  // )
   @Post()
-  @UsePipes(
-    new ValidationPipe({
-      exceptionFactory: (errors) => new BadRequestException(errors),
-    }),
-  )
-  async createReservation(
-    @Body() createReservationDto: CreateReservationDto,
-    @Query('appointment') appointmentId: number,
-  ) {
-    const reservations = await this.reservationService.createOne(
-      createReservationDto,
-      appointmentId,
-    );
-    const message = `Reservations with id:${reservations.id} successfully create`;
+  async createReservation(@Body() reservationBodyDto: ReservationBodyDto) {
+    const reservations =
+      await this.reservationService.createOne(reservationBodyDto);
+    let stringAppointments = '';
+    reservationBodyDto.filteredReservationAppoitmentsIds.map((id) => {
+      stringAppointments += ` ${id} `;
+    });
+
+    const message = `Reservations successfully create with appointments:${stringAppointments}`;
     return buildResponseDto(reservations, message);
   }
 
@@ -87,7 +93,7 @@ export class ReservationController {
   @Delete(':id')
   async deleteReservation(@Param('id') id: number) {
     const reservations = await this.reservationService.deleteOne(+id);
-    const message = `Reservations with id:${reservations.id} successfully delate`;
+    const message = ``; //Reservations with id:${reservations.id} successfully delate`;
     return buildResponseDto(reservations, message);
   }
 }

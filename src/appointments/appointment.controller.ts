@@ -47,14 +47,33 @@ export class AppointmentController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('between/:start/:end')
   async readAppointmentsBetweenDates(
-    @Param('start') start: Date,
-    @Param('end') end: Date,
+    @Param('start') startDate: string,
+    @Param('end') endDate: string,
     @Query('user') instructorId?: number,
   ): Promise<ResponseDto<AppointmentDto[]>> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     const appointments =
       await this.appointmentService.findAppointmentsBetweenDates(start, end, {
         instructorId,
       });
+    const dto = appointments.map(mapAppointmentToDto);
+    return buildResponseDto(dto);
+  }
+
+  @Get('data/:data/:hour')
+  async readAppointmentsForReservation(
+    @Param('data') data: Date,
+    @Param('hour') hour: number,
+  ): Promise<ResponseDto<AppointmentDto[]>> {
+    const reservationDate = new Date(data);
+
+    const appointments =
+      await this.appointmentService.findAppointmentsForReservation(
+        reservationDate,
+        hour,
+      );
     const dto = appointments.map(mapAppointmentToDto);
     return buildResponseDto(dto);
   }

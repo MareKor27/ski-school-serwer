@@ -25,12 +25,77 @@ export class AppointmentService {
 
   findAppointmentByReservationId(
     reservationId: number,
-  ): Promise<AppointmentModel | null> {
-    return this.appointmentModel.scope(AppointmentScope.Populated).findOne({
+  ): Promise<AppointmentModel[]> {
+    return this.appointmentModel.scope(AppointmentScope.Populated).findAll({
       where: {
         reservationId,
       },
     });
+  }
+
+  async findAppointmentsForReservation(
+    reservationtDate: Date,
+    hours: number,
+  ): Promise<AppointmentModel[]> {
+    const data1 = new Date(reservationtDate);
+    const data2 = new Date(
+      reservationtDate.setHours(reservationtDate.getHours() + hours),
+    );
+
+    const allAppointments = await this.appointmentModel
+      .scope(AppointmentScope.Populated)
+      .findAll({
+        where: {
+          reservationId: { [Op.is]: null },
+          appointmentDate: {
+            [Op.gte]: data1,
+            [Op.lte]: data2,
+          },
+        },
+        order: [
+          ['instructorId', 'ASC'],
+          ['appointmentDate', 'ASC'],
+        ],
+      });
+
+    const result: AppointmentModel[] = [];
+    const groupedByInstructor = new Map<number, AppointmentModel[]>();
+    const instructorsWithStartDate = new Set<number>();
+
+    for (const appt of allAppointments) {
+      if (appt.appointmentDate.getTime() === data1.getTime()) {
+        instructorsWithStartDate.add(appt.instructorId);
+      }
+    }
+
+    for (const appt of allAppointments) {
+      if (!instructorsWithStartDate.has(appt.instructorId)) {
+        continue; // pomiń instruktorów bez wizyty o data1
+      }
+
+      const group = groupedByInstructor.get(appt.instructorId) || [];
+      group.push(appt);
+      groupedByInstructor.set(appt.instructorId, group);
+    }
+
+    for (const appointments of groupedByInstructor.values()) {
+      let i = 0;
+      let pickedHour = 0;
+      for (const appt of appointments) {
+        if (i == 0) {
+          pickedHour = appt.appointmentDate.getHours();
+        }
+
+        if (appt.appointmentDate.getHours() < pickedHour + hours) {
+          result.push(appt);
+        } else {
+          break; // przerywamy dalsze dla tego instruktora
+        }
+        i++;
+      }
+    }
+
+    return result;
   }
 
   async findAppointmentsBetweenDates(
