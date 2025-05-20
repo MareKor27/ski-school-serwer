@@ -28,6 +28,7 @@ import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles, RolesGuard } from 'src/commons/middleware/roles-guard';
+import { PaginationQueryDto } from 'src/commons/dto/paginationQueryDto.dto';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -47,13 +48,14 @@ export class UsersController {
   @Get()
   @Roles('ADMIN')
   async readUsers(
+    @Query() queryPagination: PaginationQueryDto,
     @Query('role') role?: Role,
     @Query('name') name?: string,
     @Query('email') email?: string,
     @Query('phone') phone?: string,
-    @Query('page') page: number = 1,
-    @Query('size') size: number = 10,
   ): Promise<CollectionResponseDto<UserDto>> {
+    const { page, size } = queryPagination;
+
     const [users, totalRows] = await this.userService.findAll(
       {
         role,
@@ -66,7 +68,7 @@ export class UsersController {
     );
     const dto = users.map(mapUserToDto);
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
-  } //TTTTUTUTUTUTUTUTUTUTTAAAAAAJJAJAJAAJAJAJAJAJAJA
+  }
 
   @Post()
   @Roles('ADMIN', 'INSTRUCTOR')

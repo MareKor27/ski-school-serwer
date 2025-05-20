@@ -15,7 +15,7 @@ async function bootstrap() {
     new ValidationPipe({
       // whitelist: true, // strips properties that don't exist in the DTO
       // forbidNonWhitelisted: true, // throws an error if unknown properties are present
-      // transform: true, // auto-transform payloads to DTO instances
+      transform: true, // auto-transform payloads to DTO instances
       exceptionFactory: (errors) => new BadRequestException(errors),
     }),
   );
