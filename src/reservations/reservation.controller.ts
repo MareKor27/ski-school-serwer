@@ -11,6 +11,7 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -25,6 +26,10 @@ import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { CollectionResponseDto } from 'src/commons/dto/collectionResponse.dto';
 import { buildCollectionsResponseDto } from 'src/commons/dto/collectionsResponse.dto.mapper';
 import { PaginationQueryDto } from '../commons/dto/paginationQueryDto.dto';
+import { Actor } from 'src/commons/provider/actor.decorator';
+import { UserData } from 'src/auth/type/auth';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/commons/middleware/roles-guard';
 
 @Controller('reservation')
 export class ReservationController {
@@ -41,17 +46,22 @@ export class ReservationController {
     return buildResponseDto(dto);
   }
 
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get()
   async readReservations(
     @Query() query: PaginationQueryDto,
+    @Actor() actor: UserData,
   ): Promise<CollectionResponseDto<ReservationDto>> {
     const { page, size } = query;
 
     const [reservations, totalRows] = await this.reservationService.findAll(
+      actor,
       page,
       size,
     );
+
     const dto = reservations.map(mapReservationToDto);
+
     return buildCollectionsResponseDto(dto, {
       page,
       size,

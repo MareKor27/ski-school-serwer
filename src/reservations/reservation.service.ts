@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateReservationDto } from './dto/createReservation.dto';
 import { UpdateReservationDto } from './dto/updateReservation.dto';
 import { ReservationModel } from './models/reservation.model';
@@ -6,6 +10,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { AppointmentService } from 'src/appointments/appointment.service';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
 import { ReservationBodyDto } from './dto/reservation.dto';
+import { UserData } from 'src/auth/type/auth';
+import { Op, Sequelize } from 'sequelize';
 
 const SERVER_OPTION_MAX_LESSON_TIME = 3;
 
@@ -26,6 +32,47 @@ export class ReservationService {
   }
 
   async findAll(
+    actor: UserData,
+    page: number,
+    size: number,
+  ): Promise<[ReservationModel[], number]> {
+    switch (actor.role) {
+      case 'CLIENT':
+        throw new ForbiddenException(`Role '${actor.role}' is not supported`);
+      case 'INSTRUCTOR':
+        return this.findReservationsForActor(actor, page, size);
+      case 'ADMIN':
+        return this.findAllReservations(page, size);
+      default:
+        throw new ForbiddenException(`Role '${actor.role}' is not supported`);
+    }
+  }
+
+  async findReservationsForActor(
+    actor: UserData,
+    page: number,
+    size: number,
+  ): Promise<[ReservationModel[], number]> {
+    const limit = size;
+    const offset = size * (page - 1);
+
+    const reservationsIds =
+      await this.appointmentService.returnTableWithReservationIds(actor);
+
+    if (!reservationsIds || reservationsIds.length === 0) {
+      return [[], 0]!;
+    }
+
+    const result = await this.reservationModel.findAndCountAll({
+      where: { id: { [Op.in]: reservationsIds } },
+      limit,
+      offset,
+    });
+
+    return [result.rows, result.count];
+  }
+
+  async findAllReservations(
     page: number,
     size: number,
   ): Promise<[ReservationModel[], number]> {
@@ -33,7 +80,6 @@ export class ReservationService {
     const offset = size * (page - 1);
 
     const result = await this.reservationModel.findAndCountAll({
-      // where: whereConditions,
       limit,
       offset,
     });

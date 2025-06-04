@@ -3,10 +3,12 @@ import { CreateAppointmentDto } from './dto/createAppointment.dto';
 import { UpdateAppointmentDto } from './dto/updateAppointment.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { AppointmentModel } from './models/appointment.model';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize, WhereOptions } from 'sequelize';
 import { UserModel } from 'src/users/models/user.model';
 import { ReservationModel } from 'src/reservations/models/reservation.model';
 import { AppointmentScope } from './models/appointments.model.scopes';
+import { Role } from 'src/users/types/role';
+import { UserData } from 'src/auth/type/auth';
 
 @Injectable()
 export class AppointmentService {
@@ -96,6 +98,35 @@ export class AppointmentService {
     }
 
     return result;
+  }
+
+  async returnTableWithReservationIds(actor: UserData) {
+    const whereClause: WhereOptions = {
+      reservationId: {
+        [Op.ne]: null,
+      },
+    };
+
+    if (actor.role !== 'ADMIN') {
+      whereClause.instructorId = actor.id;
+    }
+
+    const tableWithReservation = await this.appointmentModel.findAll({
+      attributes: [
+        [
+          Sequelize.fn('DISTINCT', Sequelize.col('reservationId')),
+          'reservationId',
+        ],
+      ],
+      where: whereClause,
+      raw: true,
+    });
+
+    const tableReservationIds = tableWithReservation.map(
+      (item) => item.reservationId!,
+    );
+
+    return tableReservationIds;
   }
 
   async findAppointmentsBetweenDates(
