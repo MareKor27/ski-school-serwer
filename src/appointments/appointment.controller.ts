@@ -58,7 +58,9 @@ export class AppointmentController {
       await this.appointmentService.findAppointmentsBetweenDates(start, end, {
         instructorId,
       });
-    const dto = appointments.map(mapAppointmentToDto);
+    const dto = appointments.map((appointment) =>
+      mapAppointmentToDto(appointment),
+    );
     return buildResponseDto(dto);
   }
 
@@ -74,7 +76,9 @@ export class AppointmentController {
         reservationDate,
         hour,
       );
-    const dto = appointments.map(mapAppointmentToDto);
+    const dto = appointments.map((appointment) =>
+      mapAppointmentToDto(appointment),
+    );
     return buildResponseDto(dto);
   }
 
@@ -95,7 +99,9 @@ export class AppointmentController {
       page,
       size,
     );
-    const dto = appointments.map(mapAppointmentToDto);
+    const dto = appointments.map((appointment) =>
+      mapAppointmentToDto(appointment),
+    );
 
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }

@@ -1,8 +1,20 @@
 import { mapUserToDto } from 'src/users/dto/user.dto.mapper';
 import { Reservation } from '../models/reservation.model';
 import { ReservationDto } from './reservation.dto';
+import { mapAppointmentToDto } from 'src/appointments/dto/appointment.dto.mapper';
 
-export function mapReservationToDto(reservation: Reservation): ReservationDto {
+type Options = {
+  include?: {
+    appointments?: boolean;
+  };
+};
+
+export function mapReservationToDto(
+  reservation: Reservation,
+  options: Options = {},
+): ReservationDto {
+  const isAppointmentsIncluded = options.include?.appointments ?? true;
+
   return {
     id: reservation.id,
     // client: reservation.client
@@ -18,5 +30,10 @@ export function mapReservationToDto(reservation: Reservation): ReservationDto {
     chosenEquipment: reservation.chosenEquipment,
     additionalComments: reservation.additionalComments,
     insuranceInformation: reservation.insuranceInformation,
+    appointments: reservation.appointments.map((appointment) =>
+      isAppointmentsIncluded
+        ? mapAppointmentToDto(appointment, { include: { reservation: false } })
+        : { id: appointment.id },
+    ),
   };
 }

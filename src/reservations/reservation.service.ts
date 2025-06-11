@@ -11,7 +11,11 @@ import { AppointmentService } from 'src/appointments/appointment.service';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
 import { ReservationBodyDto } from './dto/reservation.dto';
 import { UserData } from 'src/auth/type/auth';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize, WhereOptions } from 'sequelize';
+import { FilterModel } from 'src/commons/types/FilterModel';
+import { SortModel } from 'src/commons/types/SortModel';
+import { PaginationQueryDto } from 'src/commons/dto/paginationQueryDto.dto';
+import { mapFilterToSequelizeWhere } from 'src/commons/servis/convertFilter';
 
 const SERVER_OPTION_MAX_LESSON_TIME = 3;
 
@@ -20,6 +24,10 @@ export class ReservationService {
   constructor(
     @InjectModel(ReservationModel)
     private reservationModel: typeof ReservationModel,
+
+    @InjectModel(AppointmentModel)
+    private appointmentRepository: typeof AppointmentModel,
+
     private appointmentService: AppointmentService,
   ) {}
 
@@ -31,18 +39,20 @@ export class ReservationService {
     });
   }
 
-  async findAll(
-    actor: UserData,
-    page: number,
-    size: number,
-  ): Promise<[ReservationModel[], number]> {
+  async findAll({
+    actor,
+    query,
+  }: {
+    actor: UserData;
+    query: PaginationQueryDto;
+  }): Promise<[ReservationModel[], number]> {
     switch (actor.role) {
       case 'CLIENT':
         throw new ForbiddenException(`Role '${actor.role}' is not supported`);
       case 'INSTRUCTOR':
-        return this.findReservationsForActor(actor, page, size);
+        return this.findReservationsForActor(actor, query.page, query.size);
       case 'ADMIN':
-        return this.findAllReservations(page, size);
+        return this.findAllReservations(query.page, query.size, query.filter);
       default:
         throw new ForbiddenException(`Role '${actor.role}' is not supported`);
     }
@@ -57,7 +67,7 @@ export class ReservationService {
     const offset = size * (page - 1);
 
     const reservationsIds =
-      await this.appointmentService.returnTableWithReservationIds(actor);
+      await this.appointmentService.returnTableWithReservationIds(actor.id);
 
     if (!reservationsIds || reservationsIds.length === 0) {
       return [[], 0]!;
@@ -75,15 +85,29 @@ export class ReservationService {
   async findAllReservations(
     page: number,
     size: number,
+    filterModel: FilterModel[],
   ): Promise<[ReservationModel[], number]> {
     const limit = size;
     const offset = size * (page - 1);
 
+    const whereClause: WhereOptions = mapFilterToSequelizeWhere(filterModel);
+
     const result = await this.reservationModel.findAndCountAll({
+      include: [
+        {
+          model: this.appointmentRepository,
+          where: whereClause, // filtr po instruktorze w tabeli appointment
+          required: true, // wymuszamy JOIN wewnętrzny (INNER JOIN)
+        },
+      ],
+      distinct: true,
       limit,
       offset,
     });
-
+    console.log('reservationSeris', whereClause);
+    // console.log(result.count);
+    // console.log(result.rows.map((e) => e.id));
+    // console.log(result.rows);
     return [result.rows, result.count];
   }
 

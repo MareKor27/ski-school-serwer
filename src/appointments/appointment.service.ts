@@ -100,16 +100,14 @@ export class AppointmentService {
     return result;
   }
 
-  async returnTableWithReservationIds(actor: UserData) {
+  async returnTableWithReservationIds(id: number) {
     const whereClause: WhereOptions = {
       reservationId: {
         [Op.ne]: null,
       },
     };
 
-    if (actor.role !== 'ADMIN') {
-      whereClause.instructorId = actor.id;
-    }
+    whereClause.instructorId = id;
 
     const tableWithReservation = await this.appointmentModel.findAll({
       attributes: [

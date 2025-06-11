@@ -3,6 +3,7 @@ import { PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment } from '../types/chosenEquipment';
 import { EmptyDto } from 'src/commons/dto/empty.dto';
 import { CreateReservationDto } from './createReservation.dto';
+import { AppointmentDto } from 'src/appointments/dto/appointment.dto';
 
 export type ReservationDto = {
   id: number;
@@ -28,6 +29,8 @@ export type ReservationDto = {
   additionalComments: string;
 
   insuranceInformation: string;
+
+  appointments: AppointmentDto[] | EmptyDto[];
 };
 
 export type ReservationBodyDto = {
