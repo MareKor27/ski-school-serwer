@@ -51,7 +51,7 @@ export class ReservationController {
     //console.log('controler userId', insctructorId);
     const { page, size } = query;
 
-    console.log('query', query);
+    // console.log('query', query);
     const [reservations, totalRows] = await this.reservationService.findAll({
       actor,
       query,
@@ -80,9 +80,9 @@ export class ReservationController {
     );
 
     const whereClause: WhereOptions = mapFilterToSequelizeWhere(nonNullFilters);
-    console.log(whereClause);
+    // console.log(whereClause);
     const orderClause: Order = mapSortToSequelizeOrder(sort);
-    console.log(orderClause);
+    // console.log(orderClause);
 
     // console.log(sort);
     // console.log(filter);

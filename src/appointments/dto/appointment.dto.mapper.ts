@@ -17,6 +17,22 @@ export function mapAppointmentToDto(
   const isReservationIncluded = options.include?.reservation ?? true; //opcje
   const isInstructorIncluded = options.include?.instructor ?? true; //opcje
 
+  // console.log('appointment:', appointment);
+  // console.log('appointment.reservation:', appointment.reservation);
+  // console.log(
+  //   'appointment.reservation && isReservationIncluded:',
+  //   appointment.reservation && isReservationIncluded,
+  // );
+  // console.log(
+  //   appointment.reservation && isReservationIncluded
+  //     ? mapReservationToDto(appointment.reservation, {
+  //         include: { appointments: false },
+  //       })
+  //     : appointment.reservationId
+  //       ? { id: appointment.reservationId }
+  //       : null,
+  // ); //opcje)
+
   return {
     id: appointment.id,
     //instructor: appointment.instructor ? mapUserToDto(appointment.instructor): { id: appointment.instructorId }, // bez opcji

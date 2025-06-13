@@ -143,6 +143,7 @@ export class AppointmentService {
       .findAll({
         where: whereConditions,
       });
+
     return result;
   }
 
