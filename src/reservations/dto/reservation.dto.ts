@@ -4,6 +4,7 @@ import { ChosenEquipment } from '../types/chosenEquipment';
 import { EmptyDto } from 'src/commons/dto/empty.dto';
 import { CreateReservationDto } from './createReservation.dto';
 import { AppointmentDto } from 'src/appointments/dto/appointment.dto';
+import { ReservationAdvancement } from '../types/reservationAdvancement';
 
 export type ReservationDto = {
   id: number;
@@ -22,7 +23,7 @@ export type ReservationDto = {
 
   ageOfParticipants: string;
 
-  advancement: string;
+  advancement: ReservationAdvancement;
 
   chosenEquipment: ChosenEquipment;
 

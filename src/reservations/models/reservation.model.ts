@@ -14,6 +14,7 @@ import { UserModel } from 'src/users/models/user.model';
 import { PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment } from '../types/chosenEquipment';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
+import { ReservationAdvancement } from '../types/reservationAdvancement';
 
 @Table({
   timestamps: true,
@@ -51,7 +52,7 @@ export class ReservationModel extends Model<
   ageOfParticipants: string;
 
   @Column
-  advancement: string;
+  advancement: ReservationAdvancement;
 
   @Column
   chosenEquipment: ChosenEquipment;

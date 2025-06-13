@@ -2,6 +2,10 @@ import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { purchasedTime, PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment, chosenEquipment } from '../types/chosenEquipment';
 import { UserModel } from 'src/users/models/user.model';
+import {
+  reservationAdvancement,
+  ReservationAdvancement,
+} from '../types/reservationAdvancement';
 
 export class CreateReservationDto {
   // @IsNotEmpty()
@@ -32,8 +36,10 @@ export class CreateReservationDto {
   ageOfParticipants: string;
 
   @IsNotEmpty()
-  @IsString()
-  advancement: string;
+  @IsEnum(reservationAdvancement, {
+    message: 'incorrectly selected reservationAdvancement',
+  })
+  advancement: ReservationAdvancement;
 
   @IsNotEmpty()
   @IsEnum(chosenEquipment, { message: 'incorrectly selected equipment' })
