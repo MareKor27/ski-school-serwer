@@ -58,9 +58,12 @@ export class AppointmentController {
       await this.appointmentService.findAppointmentsBetweenDates(start, end, {
         instructorId,
       });
+
+    // console.log('appoitments', appointments.length);
     const dto = appointments.map((appointment) =>
-      mapAppointmentToDto(appointment),
+      mapAppointmentToDto(appointment, { include: { reservation: false } }),
     );
+    console.log('appoitments');
     return buildResponseDto(dto);
   }
 

@@ -30,7 +30,7 @@ export function mapReservationToDto(
     chosenEquipment: reservation.chosenEquipment,
     additionalComments: reservation.additionalComments,
     insuranceInformation: reservation.insuranceInformation,
-    appointments: reservation.appointments.map((appointment) =>
+    appointments: reservation.appointments?.map((appointment) =>
       isAppointmentsIncluded
         ? mapAppointmentToDto(appointment, { include: { reservation: false } })
         : { id: appointment.id },
