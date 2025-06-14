@@ -131,6 +131,8 @@ export class AppointmentController {
     @Body() createAvailabilityDto: CreateAppointmentDto,
     @Actor() user: UserData,
   ) {
+    // console.log(createAvailabilityDto);
+    // console.log(user);
     const appointment = await this.appointmentService.createAppointment(
       user.id,
       createAvailabilityDto.appointmentDate,

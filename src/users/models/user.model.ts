@@ -36,6 +36,9 @@ export class UserModel extends Model<
 
   @Column
   role: Role;
+
+  @Column
+  iconColor: string;
 }
 
 export type User = InferAttributes<UserModel>;

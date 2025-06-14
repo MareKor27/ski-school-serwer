@@ -26,4 +26,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsEnum(roles, { message: 'Valid role required' })
   role: Role;
+
+  @IsNotEmpty()
+  iconColor: string;
 }

@@ -95,6 +95,7 @@ export class AuthService {
         password: hashedPassword,
         name,
         role: 'INSTRUCTOR',
+        iconColor: '',
       });
     } catch (error) {
       throw error;
