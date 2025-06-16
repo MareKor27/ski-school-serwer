@@ -35,5 +35,6 @@ export function mapReservationToDto(
         ? mapAppointmentToDto(appointment, { include: { reservation: false } })
         : { id: appointment.id },
     ),
+    lessonStatus: reservation.lessonStatus,
   };
 }

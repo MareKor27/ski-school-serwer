@@ -63,6 +63,9 @@ export class ReservationModel extends Model<
   @Column
   insuranceInformation: string;
 
+  @Column
+  lessonStatus: string;
+
   @HasMany(() => AppointmentModel)
   appointments: AppointmentModel[];
 

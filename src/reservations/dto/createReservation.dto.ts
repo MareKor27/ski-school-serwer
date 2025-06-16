@@ -50,4 +50,7 @@ export class CreateReservationDto {
 
   @IsString()
   insuranceInformation: string;
+
+  @IsString()
+  lessonStatus: string;
 }

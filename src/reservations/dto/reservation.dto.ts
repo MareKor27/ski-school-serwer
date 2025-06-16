@@ -32,6 +32,8 @@ export type ReservationDto = {
   insuranceInformation: string;
 
   appointments: AppointmentDto[] | EmptyDto[];
+
+  lessonStatus: string;
 };
 
 export type ReservationBodyDto = {
