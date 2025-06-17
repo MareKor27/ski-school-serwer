@@ -182,10 +182,29 @@ export class AppointmentService {
     return [result.rows, result.count];
   }
 
-  createAppointment(
+  async findOneByUserAndDate(userId: number, data: Date) {
+    const appointment = await this.appointmentModel.findOne({
+      where: {
+        reservationId: { [Op.is]: null },
+        appointmentDate: {
+          [Op.eq]: data,
+        },
+        instructorId: { [Op.eq]: userId },
+      },
+    });
+    return appointment;
+  }
+
+  async createAppointment(
     instructorId: number,
     appointmentDate: Date,
   ): Promise<AppointmentModel> {
+    const checkedAppointment = await this.findOneByUserAndDate(
+      instructorId,
+      appointmentDate,
+    );
+    if (checkedAppointment != null) return checkedAppointment;
+
     return this.appointmentModel.create({ instructorId, appointmentDate });
   }
 
@@ -214,6 +233,18 @@ export class AppointmentService {
   async deleteOne(id: number): Promise<AppointmentModel> {
     const appointment = await this.findAppointmentById(id);
     if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+    await appointment.destroy();
+    return appointment;
+  }
+
+  async deleteOneByDateAndUser(
+    userId: number,
+    data: Date,
+  ): Promise<AppointmentModel | null> {
+    const appointment = await this.findOneByUserAndDate(userId, data);
+    if (!appointment || null) {
       throw new Error('Appointment not found');
     }
     await appointment.destroy();

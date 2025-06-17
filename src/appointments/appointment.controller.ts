@@ -160,4 +160,39 @@ export class AppointmentController {
     const message = `Appointment with id:${appointment.id} successfully delate`;
     return buildResponseDto(appointment, message);
   }
+
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Post('/generate/day')
+  async setAppointmentsByDay(@Body() requestBody, @Actor() user) {
+    console.log(requestBody);
+
+    const chosenDate = new Date(requestBody.chosenDate);
+    console.log(chosenDate, user);
+
+    if (requestBody.checked) {
+      console.log('tworzymy w tym dniu');
+
+      // POWINIENEM TWORZYĆ JEDEN OBIEKT Z DANYMI NIŻ W PĘTLI TWORZYĆ KILKA
+      for (let hour = 10; hour < 20; hour++) {
+        const appointmentDate = new Date(chosenDate);
+        appointmentDate.setHours(hour);
+        console.log(appointmentDate);
+        await this.appointmentService.createAppointment(
+          user.id,
+          appointmentDate,
+        );
+      }
+    } else {
+      console.log('usuwamy w tym dniu');
+      //USUWANIE
+      for (let hour = 10; hour < 20; hour++) {
+        const appointmentDate = new Date(chosenDate);
+        appointmentDate.setHours(hour);
+        await this.appointmentService.deleteOneByDateAndUser(
+          user.id,
+          appointmentDate,
+        );
+      }
+    }
+  }
 }
