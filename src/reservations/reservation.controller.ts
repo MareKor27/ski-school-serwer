@@ -48,7 +48,6 @@ export class ReservationController {
     @Actor() actor: UserData,
     //@Query('id') insctructorId: number | null,
   ): Promise<CollectionResponseDto<ReservationDto>> {
-    //console.log('controler userId', insctructorId);
     const { page, size } = query;
 
     // console.log('query', query);

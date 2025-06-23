@@ -79,8 +79,32 @@ export class ReservationService {
       return [[], 0]!;
     }
 
+    // const result = await this.reservationModel.findAndCountAll({
+    //   where: { id: { [Op.in]: reservationsIds } },
+    //   limit,
+    //   offset,
+    // });
     const result = await this.reservationModel.findAndCountAll({
       where: { id: { [Op.in]: reservationsIds } },
+      include: [
+        {
+          model: this.appointmentRepository,
+          required: true, // wymuszamy JOIN wewnętrzny (INNER JOIN)
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+      order: [
+        [
+          { model: this.appointmentRepository, as: 'appointments' },
+          'appointmentDate',
+          'ASC',
+        ],
+      ],
+      distinct: true,
       limit,
       offset,
     });

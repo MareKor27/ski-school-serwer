@@ -46,7 +46,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles('ADMIN')
+  @Roles('ADMIN', 'INSTRUCTOR')
   async readUsers(
     @Query() queryPagination: PaginationQueryDto,
     @Query('role') role?: Role,
