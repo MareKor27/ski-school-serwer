@@ -163,8 +163,16 @@ export class AppointmentController {
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post('/generate/day')
-  async setAppointmentsByDay(@Body() requestBody, @Actor() user) {
+  async setAppointmentsByDay(
+    @Body() requestBody,
+    @Actor() user: UserDto,
+    @Query('user') userId: number,
+  ) {
     console.log(requestBody);
+    console.log(user);
+    console.log(userId);
+
+    const affectedUserId = user.id == userId ? user.id : userId;
 
     const chosenDate = new Date(requestBody.chosenDate);
     console.log(chosenDate, user);
@@ -178,7 +186,7 @@ export class AppointmentController {
         appointmentDate.setHours(hour);
         console.log(appointmentDate);
         await this.appointmentService.createAppointment(
-          user.id,
+          affectedUserId,
           appointmentDate,
         );
       }
@@ -189,7 +197,7 @@ export class AppointmentController {
         const appointmentDate = new Date(chosenDate);
         appointmentDate.setHours(hour);
         await this.appointmentService.deleteOneByDateAndUser(
-          user.id,
+          affectedUserId,
           appointmentDate,
         );
       }
