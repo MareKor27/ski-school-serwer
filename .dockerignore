@@ -13,3 +13,4 @@ Dockerfile
 
 # Env & OS
 .DS_Store
+.env

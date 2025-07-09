@@ -25,9 +25,6 @@ RUN npm install --only=production
 # Copy compiled output from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy any other necessary files (e.g., .env, config)
-COPY .env .env
-
 EXPOSE 3000
 
 # Command to run the app
