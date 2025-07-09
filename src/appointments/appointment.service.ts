@@ -9,6 +9,9 @@ import { ReservationModel } from 'src/reservations/models/reservation.model';
 import { AppointmentScope } from './models/appointments.model.scopes';
 import { Role } from 'src/users/types/role';
 import { UserData } from 'src/auth/type/auth';
+import { UserDto } from 'src/users/dto/user.dto';
+import { AppointmentRequestBody } from './dto/appointmentRequestBody.dto';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class AppointmentService {
@@ -228,6 +231,64 @@ export class AppointmentService {
     }
 
     return affectedRows[0];
+  }
+
+  async createFewAppointmentsOnOneDay(
+    requestBody: AppointmentRequestBody,
+    user: UserDto,
+    userId: number,
+  ) {
+    const timeZone = 'Europe/Warsaw';
+
+    console.log(requestBody);
+    console.log(user);
+    console.log(userId);
+
+    const affectedUserId = user.id == userId ? user.id : userId;
+
+    const chosenDate = new Date(requestBody.chosenDate);
+    console.log(chosenDate, user);
+
+    if (requestBody.checked) {
+      console.log('tworzymy w tym dniu');
+
+      // POWINIENEM TWORZYĆ JEDEN OBIEKT Z DANYMI NIŻ W PĘTLI TWORZYĆ KILKA
+      for (let hour = 10; hour < 20; hour++) {
+        const appointmentDate = new Date(chosenDate);
+        // appointmentDate.setUTCHours(hour);
+        // console.log(appointmentDate);
+        const localDate: DateTime = DateTime.fromObject(
+          {
+            year: chosenDate.getFullYear(),
+            month: chosenDate.getMonth() + 1,
+            day: chosenDate.getDate(),
+            hour,
+          },
+          { zone: timeZone },
+        );
+        console.log(localDate.toJSDate());
+        await this.createAppointment(affectedUserId, localDate.toJSDate());
+      }
+    } else {
+      console.log('usuwamy w tym dniu');
+      //USUWANIE
+      for (let hour = 10; hour < 20; hour++) {
+        // const appointmentDate = new Date(chosenDate);
+        // appointmentDate.setHours(hour);
+
+        const localDate = DateTime.fromObject(
+          {
+            year: chosenDate.getFullYear(),
+            month: chosenDate.getMonth() + 1,
+            day: chosenDate.getDate(),
+            hour,
+          },
+          { zone: timeZone },
+        );
+        console.log(localDate.toJSDate());
+        await this.deleteOneByDateAndUser(affectedUserId, localDate.toJSDate());
+      }
+    }
   }
 
   async deleteOne(id: number): Promise<AppointmentModel> {

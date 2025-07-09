@@ -28,6 +28,7 @@ import { RolesGuard } from 'src/commons/middleware/roles-guard';
 import { Actor } from 'src/commons/provider/actor.decorator';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserData } from 'src/auth/type/auth';
+import { AppointmentRequestBody } from './dto/appointmentRequestBody.dto';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -164,43 +165,14 @@ export class AppointmentController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post('/generate/day')
   async setAppointmentsByDay(
-    @Body() requestBody,
+    @Body() requestBody: AppointmentRequestBody,
     @Actor() user: UserDto,
     @Query('user') userId: number,
   ) {
-    console.log(requestBody);
-    console.log(user);
-    console.log(userId);
-
-    const affectedUserId = user.id == userId ? user.id : userId;
-
-    const chosenDate = new Date(requestBody.chosenDate);
-    console.log(chosenDate, user);
-
-    if (requestBody.checked) {
-      console.log('tworzymy w tym dniu');
-
-      // POWINIENEM TWORZYĆ JEDEN OBIEKT Z DANYMI NIŻ W PĘTLI TWORZYĆ KILKA
-      for (let hour = 10; hour < 20; hour++) {
-        const appointmentDate = new Date(chosenDate);
-        appointmentDate.setHours(hour);
-        console.log(appointmentDate);
-        await this.appointmentService.createAppointment(
-          affectedUserId,
-          appointmentDate,
-        );
-      }
-    } else {
-      console.log('usuwamy w tym dniu');
-      //USUWANIE
-      for (let hour = 10; hour < 20; hour++) {
-        const appointmentDate = new Date(chosenDate);
-        appointmentDate.setHours(hour);
-        await this.appointmentService.deleteOneByDateAndUser(
-          affectedUserId,
-          appointmentDate,
-        );
-      }
-    }
+    await this.appointmentService.createFewAppointmentsOnOneDay(
+      requestBody,
+      user,
+      userId,
+    );
   }
 }
