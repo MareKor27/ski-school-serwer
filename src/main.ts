@@ -6,10 +6,10 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // służy do połączeń pomiędzy różnymi adresami w celu zabezpieczeń
-  // app.enableCors({
-  //   origin: process.env.WEBSITE_URL,
-  // });
+  //służy do połączeń pomiędzy różnymi adresami w celu zabezpieczeń
+  app.enableCors({
+    origin: process.env.WEBSITE_URL,
+  });
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
@@ -21,7 +21,9 @@ async function bootstrap() {
     }),
   );
 
-  app.setGlobalPrefix('api');
+  if (process.env.ROOT_PATH) {
+    app.setGlobalPrefix(process.env.ROOT_PATH);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }
