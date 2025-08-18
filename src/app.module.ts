@@ -5,6 +5,7 @@ import { AppointmentModule } from './appointments/appointment.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
     ReservationModule,
     AppointmentModule,
     AuthModule,
+    CronModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -25,6 +27,7 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.DB_NAME,
       synchronize: true,
       autoLoadModels: true,
+      // sync: { alter: true },
     }),
   ],
 })
