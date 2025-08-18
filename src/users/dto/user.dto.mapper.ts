@@ -8,5 +8,6 @@ export function mapUserToDto(user: User): UserDto {
     email: user.email,
     role: user.role,
     iconColor: user.iconColor,
+    status: user.status,
   };
 }

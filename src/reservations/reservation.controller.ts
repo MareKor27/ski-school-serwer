@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,14 +9,10 @@ import {
   Patch,
   Post,
   Query,
-  Res,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 
 import { ReservationService } from './reservation.service';
-import { CreateReservationDto } from './dto/createReservation.dto';
 import { UpdateReservationDto } from './dto/updateReservation.dto';
 import { ReservationBodyDto, ReservationDto } from './dto/reservation.dto';
 import { mapReservationToDto } from './dto/reservation.dto.mapper';
@@ -36,10 +31,16 @@ import { Order, WhereOptions } from 'sequelize';
 import { mapFilterToSequelizeWhere } from 'src/commons/servis/convertFilter';
 import { FilterModel } from 'src/commons/types/FilterModel';
 import { mapSortToSequelizeOrder } from 'src/commons/servis/convertSort';
+import * as nodemailer from 'nodemailer';
+import { ReservationModel } from './models/reservation.model';
+import { AuthService } from 'src/auth/auth.service';
 
 @Controller('reservation')
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(
+    private readonly reservationService: ReservationService,
+    private readonly authService: AuthService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get()
@@ -51,12 +52,12 @@ export class ReservationController {
     const { page, size } = query;
 
     // console.log('query', query);
-    const [reservations, totalRows] = await this.reservationService.findAll({
+    const [reservation, totalRows] = await this.reservationService.findAll({
       actor,
       query,
     });
 
-    const dto = reservations.map((reservation) =>
+    const dto = reservation.map((reservation) =>
       mapReservationToDto(reservation),
     );
 
@@ -67,27 +68,27 @@ export class ReservationController {
     });
   }
 
-  @Get('test')
-  async testEndpoint(
-    @Query('sort') sorts: string[] = [],
-    @Query('filter') filters: string[] = [],
-  ) {
-    const sort = sorts.map(parseSort);
-    const filter = filters.map(parseFilter);
-    const nonNullFilters = filter.filter(
-      (f): f is FilterModel<string> => f !== null,
-    );
+  // @Get('test')
+  // async testEndpoint(
+  //   @Query('sort') sorts: string[] = [],
+  //   @Query('filter') filters: string[] = [],
+  // ) {
+  //   const sort = sorts.map(parseSort);
+  //   const filter = filters.map(parseFilter);
+  //   const nonNullFilters = filter.filter(
+  //     (f): f is FilterModel<string> => f !== null,
+  //   );
 
-    const whereClause: WhereOptions = mapFilterToSequelizeWhere(nonNullFilters);
-    // console.log(whereClause);
-    const orderClause: Order = mapSortToSequelizeOrder(sort);
-    // console.log(orderClause);
+  //   const whereClause: WhereOptions = mapFilterToSequelizeWhere(nonNullFilters);
+  //   // console.log(whereClause);
+  //   const orderClause: Order = mapSortToSequelizeOrder(sort);
+  //   // console.log(orderClause);
 
-    // console.log(sort);
-    // console.log(filter);
+  //   // console.log(sort);
+  //   // console.log(filter);
 
-    return { sort, filter };
-  }
+  //   return { sort, filter };
+  // }
 
   // @UsePipes(
   //   new ValidationPipe({
@@ -96,7 +97,7 @@ export class ReservationController {
   // )
   @Post()
   async createReservation(@Body() reservationBodyDto: ReservationBodyDto) {
-    const reservations =
+    const reservation =
       await this.reservationService.createOne(reservationBodyDto);
     let stringAppointments = '';
     reservationBodyDto.filteredReservationAppoitmentsIds.map((id) => {
@@ -104,7 +105,79 @@ export class ReservationController {
     });
 
     const message = `Reservations successfully create with appointments:${stringAppointments}`;
-    return buildResponseDto(reservations, message);
+
+    const reservationWithAllData = await this.reservationService.findOne(
+      reservation.id,
+    );
+    if (reservationWithAllData != null) {
+      const reservationToken = await this.authService.reservationToken(
+        reservationWithAllData,
+      );
+      await this.sendEmail(reservationWithAllData, reservationToken);
+    }
+
+    return buildResponseDto(reservation, message);
+  }
+
+  async sendEmail(reservation: ReservationModel, token: string) {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    const url = `http://localhost:5173/administrator/weryfikacja/${token}`;
+
+    const htmlContent = `
+<h1 style="font-family: Arial, sans-serif;">Witaj!</h1>
+<h2 style="font-family: Arial, sans-serif;">Została stworzona rezerwacja na:</h2>
+<p style="font-family: Arial, sans-serif;">Kliknij poniższy link, aby potwierdzić rezerwację:</p>
+<p><a href="${url}" style="font-family: Arial, sans-serif; color: #1a73e8;">${url}</a></p>
+<hr style="margin: 20px 0;" />
+<h3 style="font-family: Arial, sans-serif;">Dane rezerwacji:</h3>
+<table cellpadding="8" cellspacing="0" style="border-collapse: collapse; font-family: Arial, sans-serif; width: 100%; max-width: 600px;">
+  <thead>
+    <tr style="background-color: #f2f2f2;">
+      <th style="border: 1px solid #ddd; text-align: left;">Pole</th>
+      <th style="border: 1px solid #ddd; text-align: left;">Wartość</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="border: 1px solid #ddd;">ID</td><td style="border: 1px solid #ddd;">${reservation.id}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Data rezerwacji</td><td style="border: 1px solid #ddd;">${reservation.appointments[0].appointmentDate.toLocaleDateString(
+      'pl-PL',
+      {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long',
+        hour: '2-digit',
+        minute: '2-digit',
+      },
+    )}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Imię i nazwisko</td><td style="border: 1px solid #ddd;">${reservation.fullName}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Email</td><td style="border: 1px solid #ddd;">${reservation.email}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Numer telefonu</td><td style="border: 1px solid #ddd;">${reservation.phoneNumber}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Wykupiony czas (godziny)</td><td style="border: 1px solid #ddd;">${reservation.purchasedTime}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Liczba uczestników</td><td style="border: 1px solid #ddd;">${reservation.participants}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Wiek uczestników</td><td style="border: 1px solid #ddd;">${reservation.ageOfParticipants}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Poziom zaawansowania</td><td style="border: 1px solid #ddd;">${reservation.advancement}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Wybrane wyposażenie</td><td style="border: 1px solid #ddd;">${reservation.chosenEquipment}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Dodatkowe uwagi</td><td style="border: 1px solid #ddd;">${reservation.additionalComments || '---'}</td></tr>
+    <tr><td style="border: 1px solid #ddd;">Informacje o ubezpieczeniu</td><td style="border: 1px solid #ddd;">${reservation.insuranceInformation || '---'}</td></tr>
+  </tbody>
+</table>`;
+
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to: reservation.email,
+      subject: `FigowskiSport - Potwierdzenie rezerwacji #${reservation.id}`,
+      html: htmlContent,
+    });
   }
 
   @Patch(':id')
@@ -112,19 +185,19 @@ export class ReservationController {
     @Param('id') id: number,
     @Body() updateReservationDto: UpdateReservationDto,
   ) {
-    const reservations = await this.reservationService.updateOne(
+    const reservation = await this.reservationService.updateOne(
       id,
       updateReservationDto,
     );
-    const message = `Reservations with id:${reservations.id} successfully update`;
-    return buildResponseDto(reservations, message);
+    const message = `Reservations with id:${reservation.id} successfully update`;
+    return buildResponseDto(reservation, message);
   }
 
   @Delete(':id')
   async deleteReservation(@Param('id') id: number) {
-    const reservations = await this.reservationService.deleteOne(+id);
-    const message = ``; //Reservations with id:${reservations.id} successfully delate`;
-    return buildResponseDto(reservations, message);
+    const reservation = await this.reservationService.deleteOne(+id);
+    const message = ``; //Reservations with id:${reservation.id} successfully delate`;
+    return buildResponseDto(reservation, message);
   }
 
   @Get(':id')

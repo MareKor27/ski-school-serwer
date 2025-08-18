@@ -20,7 +20,9 @@ export class UsersService {
   ) {}
 
   async findByEmail(email: string): Promise<UserModel | null> {
-    return this.userModel.findOne({ where: { email } });
+    return this.userModel.findOne({
+      where: { email, status: { [Op.ne]: 'INACTIVE' } },
+    });
   }
 
   async validateUser(
@@ -54,7 +56,7 @@ export class UsersService {
   ): Promise<[UserModel[], number]> {
     const limit = size;
     const offset = size * (page - 1);
-    const whereConditions: any = {};
+    const whereConditions: any = { status: { [Op.ne]: 'INACTIVE' } };
 
     if (filters.role) {
       whereConditions.role = filters.role;

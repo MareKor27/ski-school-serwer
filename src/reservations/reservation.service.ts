@@ -19,6 +19,7 @@ import { mapFilterToSequelizeWhere } from 'src/commons/servis/convertFilter';
 
 import { UserModel } from 'src/users/models/user.model';
 import { mapSortToSequelizeOrder } from 'src/commons/servis/convertSort';
+import { mapReservationToDto } from './dto/reservation.dto.mapper';
 
 const SERVER_OPTION_MAX_LESSON_TIME = 3;
 
@@ -42,6 +43,18 @@ export class ReservationService {
       where: {
         id,
       },
+      include: [
+        {
+          model: this.appointmentRepository,
+          required: true,
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
+          order: [['date', 'ASC']],
+        },
+      ],
     });
   }
 
@@ -119,14 +132,27 @@ export class ReservationService {
     const limit = size;
     const offset = size * (page - 1);
 
-    const whereClause: WhereOptions = mapFilterToSequelizeWhere(filter);
-    const sortClause: Order = mapSortToSequelizeOrder(sort);
+    const reservationFields = ['lessonStatus'];
+    const reservationWhere = {}; // dla reservationModel
+    const appointmentWhere = {}; // dla appointmentRepository
 
+    const whereClause: WhereOptions = mapFilterToSequelizeWhere(filter);
+
+    for (const [key, condition] of Object.entries(whereClause)) {
+      if (reservationFields.includes(key)) {
+        reservationWhere[key] = condition;
+      } else {
+        appointmentWhere[key] = condition;
+      }
+    }
+
+    const sortClause: Order = mapSortToSequelizeOrder(sort);
     const result = await this.reservationModel.findAndCountAll({
+      where: reservationWhere,
       include: [
         {
           model: this.appointmentRepository,
-          where: whereClause, // filtr po instruktorze w tabeli appointment
+          where: appointmentWhere, // filtr po instruktorze w tabeli appointment
           required: true, // wymuszamy JOIN wewnętrzny (INNER JOIN)
           include: [
             {
@@ -146,8 +172,8 @@ export class ReservationService {
       limit,
       offset,
     });
-    console.log('whereClause', whereClause);
-    console.log('sortClause', sortClause);
+    // console.log('whereClause', whereClause);
+    // console.log('sortClause', sortClause);
     // console.log(result.count);
     // console.log(result.rows.map((e) => e.id));
     // console.log(result.rows);
@@ -184,6 +210,7 @@ export class ReservationService {
           await appointment.save();
         }
       }
+
       return reservation;
     } catch (error) {
       throw new Error('server error');

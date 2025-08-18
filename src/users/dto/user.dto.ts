@@ -8,4 +8,6 @@ export type UserDto = {
   role: string;
 
   iconColor: string;
+
+  status: string;
 };

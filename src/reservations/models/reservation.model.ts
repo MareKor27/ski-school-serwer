@@ -15,6 +15,7 @@ import { PurchasedTime } from '../types/purchasedTime';
 import { ChosenEquipment } from '../types/chosenEquipment';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
 import { ReservationAdvancement } from '../types/reservationAdvancement';
+import { LessonStatus } from '../types/lessonStatus';
 
 @Table({
   timestamps: true,
@@ -63,8 +64,11 @@ export class ReservationModel extends Model<
   @Column
   insuranceInformation: string;
 
-  @Column
-  lessonStatus: string;
+  @Column({
+    allowNull: false,
+    defaultValue: 'reserved',
+  })
+  lessonStatus: LessonStatus;
 
   @HasMany(() => AppointmentModel)
   appointments: AppointmentModel[];

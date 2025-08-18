@@ -145,6 +145,14 @@ export class AppointmentService {
       .scope(AppointmentScope.Populated)
       .findAll({
         where: whereConditions,
+        include: [
+          {
+            model: UserModel,
+            as: 'instructor',
+            where: { status: { [Op.ne]: 'INACTIVE' } },
+            required: true,
+          },
+        ],
       });
 
     return result;

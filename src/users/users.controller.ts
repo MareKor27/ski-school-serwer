@@ -4,6 +4,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -70,13 +72,20 @@ export class UsersController {
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
 
-  @Post()
-  @Roles('ADMIN', 'INSTRUCTOR')
-  async createUser(@Body() userData: CreateUserDto) {
-    const user = await this.userService.create(userData);
-    const message = `User with id:${user.id} successfully created`;
-    return buildResponseDto(user, message);
-  }
+  // @Post()
+  // @Roles('ADMIN', 'INSTRUCTOR')
+  // async createUser(@Body() userData: CreateUserDto) {
+  //   console.log('bład');
+  //   const { email } = userData;
+  //   const exists = await UserModel.findOne({
+  //     where: { email, status: 'ACTIVE' },
+  //   });
+  //   if (exists) throw new Error('Email zajęty');
+
+  //   const user = await this.userService.create(userData);
+  //   const message = `User with id:${user.id} successfully created`;
+  //   return buildResponseDto(user, message);
+  // }
 
   @Patch(':id')
   @Roles('ADMIN', 'INSTRUCTOR')
@@ -92,7 +101,18 @@ export class UsersController {
   @Delete(':id')
   @Roles('ADMIN')
   async deleteUser(@Param('id') id: number): Promise<ResponseDto<UserDto>> {
-    const user = await this.userService.delete(id);
+    const user = await this.userService.findOneUser(id);
+    // const user = await this.userService.delete(id);
+    if (!user) {
+      throw new HttpException(
+        {
+          message: 'Nie ma takiego uzytkownika',
+        },
+        HttpStatus.CONFLICT,
+      );
+    }
+    user.status = 'INACTIVE';
+    await user.save();
     const message = `User with id:${user.id} successfully deleted`;
     return buildResponseDto(user, message);
   }

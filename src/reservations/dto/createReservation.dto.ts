@@ -6,6 +6,7 @@ import {
   reservationAdvancement,
   ReservationAdvancement,
 } from '../types/reservationAdvancement';
+import { LessonStatus } from '../types/lessonStatus';
 
 export class CreateReservationDto {
   // @IsNotEmpty()
@@ -52,5 +53,5 @@ export class CreateReservationDto {
   insuranceInformation: string;
 
   @IsString()
-  lessonStatus: string;
+  lessonStatus: LessonStatus;
 }

@@ -29,4 +29,8 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   iconColor: string;
+
+  @IsString()
+  @IsNotEmpty()
+  status: string;
 }

@@ -55,4 +55,9 @@ export class AuthController {
   async loginToken(@Actor() user: UserData) {
     return this.authService.createNewToken(user);
   }
+
+  @Post('verification/:token')
+  async reservationVerification(@Param('token') token: string) {
+    return this.authService.checkReservation(token);
+  }
 }

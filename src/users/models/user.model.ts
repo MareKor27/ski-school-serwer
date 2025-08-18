@@ -7,7 +7,7 @@ import {
   Unique,
 } from 'sequelize-typescript';
 import { Role } from '../types/role';
-import { InferAttributes, InferCreationAttributes } from 'sequelize';
+import { DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
 
 @Table({
   timestamps: true,
@@ -28,7 +28,6 @@ export class UserModel extends Model<
   @Column({ allowNull: false })
   password: string;
 
-  @Unique
   @Column({
     allowNull: false,
   })
@@ -39,6 +38,13 @@ export class UserModel extends Model<
 
   @Column
   iconColor: string;
+
+  //'CREATED', 'ACTIVE', 'PASSWORD_RESET', 'INACTIVE'
+  @Column({
+    allowNull: false,
+    defaultValue: 'CREATED',
+  })
+  status: string;
 }
 
 export type User = InferAttributes<UserModel>;
