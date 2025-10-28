@@ -21,13 +21,24 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { UserData } from './type/auth';
 import { AuthGuard } from '@nestjs/passport';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
+import { Audit } from 'src/audit/audit-log.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
+  @Audit('AUTH-LOGIN_TO_SYSTEM')
   async login(@Body() loginDto: LoginDto) {
+    // await this.authService.log({
+    //   action: 'UPDATE_ORDER_STATUS',
+    //   userId: user.id,
+    //   path: `/orders/${id}/status`,
+    //   body: { from: oldStatus, to: newStatus },
+    //   response: null,
+    //   isError: false,
+    //   message: `Status zmieniony z ${oldStatus} na ${newStatus}`,
+    // });
     return this.authService.login(loginDto.email, loginDto.password);
   }
 
@@ -42,6 +53,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @Audit('AUTH-RESET-PASSWORD')
   async resetPassword(
     @Body()
     resetPasswordDto: ResetPasswordDto,
@@ -59,6 +71,7 @@ export class AuthController {
   }
 
   @Get('verification/:token')
+  @Audit('AUTH-RESERVATION_VERYFICATION')
   async reservationVerification(@Param('token') token: string) {
     console.log('verification/:token');
     const reservation = await this.authService.checkReservation(token);

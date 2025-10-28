@@ -9,6 +9,7 @@ import { ReservationModel } from 'src/reservations/models/reservation.model';
 @Injectable()
 export class ReservastionResetCleanupService {
   private readonly logger = new Logger(ReservastionResetCleanupService.name);
+  auditService: any;
 
   constructor(
     @InjectModel(BookingReservationModel)
@@ -40,6 +41,16 @@ export class ReservastionResetCleanupService {
       .filter((id) => id !== null);
 
     console.log(reservationIds);
+
+    await this.auditService.log({
+      action: 'REMOVAL OF EXPIRED TOKENS',
+      userId: null,
+      path: ``,
+      body: { reservationId: reservationIds },
+      response: null,
+      isError: false,
+      message: `Usuniecie przedawnionego tokenu rezerwacji`,
+    });
 
     const appointments = await this.appointmentModel.findAll({
       where: {

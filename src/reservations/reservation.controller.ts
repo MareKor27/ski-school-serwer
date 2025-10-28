@@ -34,6 +34,7 @@ import { mapSortToSequelizeOrder } from 'src/commons/servis/convertSort';
 import * as nodemailer from 'nodemailer';
 import { ReservationModel } from './models/reservation.model';
 import { AuthService } from 'src/auth/auth.service';
+import { Audit } from 'src/audit/audit-log.decorator';
 
 @Controller('reservation')
 export class ReservationController {
@@ -96,6 +97,7 @@ export class ReservationController {
   //   }),
   // )
   @Post()
+  @Audit('RESERVATION-CREATE')
   async createReservation(@Body() reservationBodyDto: ReservationBodyDto) {
     const reservation =
       await this.reservationService.createOne(reservationBodyDto);
@@ -194,6 +196,7 @@ export class ReservationController {
   }
 
   @Delete(':id')
+  @Audit('RESERVATION-DELETE')
   async deleteReservation(@Param('id') id: number) {
     const reservation = await this.reservationService.deleteOne(+id);
     const message = ``; //Reservations with id:${reservation.id} successfully delate`;
