@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
 import { PasswordResetRequestModel } from 'src/auth/model/password-reset-request.model';
 import { Op } from 'sequelize';
@@ -19,7 +19,7 @@ export class PasswordResetCleanupService {
     const now = new Date();
     const deleted = await this.passwordResetModel.destroy({
       where: {
-        exp: { [Op.lt]: now },
+        exp: { [Op.gt]: now },
       },
     });
     this.logger.log(`Usunięto ${deleted} wygasłych rekordów.`);

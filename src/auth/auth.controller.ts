@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Param,
   Post,
   UseGuards,
@@ -19,6 +20,7 @@ import { Actor } from 'src/commons/provider/actor.decorator';
 import { UserDto } from 'src/users/dto/user.dto';
 import { UserData } from './type/auth';
 import { AuthGuard } from '@nestjs/passport';
+import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 
 @Controller('auth')
 export class AuthController {
@@ -56,8 +58,11 @@ export class AuthController {
     return this.authService.createNewToken(user);
   }
 
-  @Post('verification/:token')
+  @Get('verification/:token')
   async reservationVerification(@Param('token') token: string) {
-    return this.authService.checkReservation(token);
+    console.log('verification/:token');
+    const reservation = await this.authService.checkReservation(token);
+
+    return buildResponseDto(reservation);
   }
 }

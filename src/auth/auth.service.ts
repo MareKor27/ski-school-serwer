@@ -218,10 +218,15 @@ export class AuthService {
 
   async checkReservation(token: string) {
     const date = new Date();
+
     const bookedRegistration = await this.bookingReservation.findOne({
-      where: { token, exp: { [Op.lte]: date } },
+      where: { token, exp: { [Op.gte]: date } },
     });
-    if (!bookedRegistration) return; // Error?
+
+    if (!bookedRegistration) {
+      console.log('empty');
+      return;
+    } // Error?
 
     const reservation = await this.reservationService.findOne(
       bookedRegistration.reservationId,
