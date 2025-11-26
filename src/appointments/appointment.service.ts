@@ -91,12 +91,15 @@ export class AppointmentService {
           pickedHour = appt.appointmentDate.getHours();
         }
 
-        if (appt.appointmentDate.getHours() < pickedHour + hours) {
+        if (appt.appointmentDate.getHours() == pickedHour) {
           result.push(appt);
         } else {
           break; // przerywamy dalsze dla tego instruktora
         }
-        i++;
+        if (i == hours - 1) {
+          break; // osiągnięto wymaganą liczbę godzin
+        }
+        i++, pickedHour++;
       }
     }
 

@@ -46,7 +46,7 @@ export class AppointmentController {
     return buildResponseDto(dto);
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('between/:start/:end')
   async readAppointmentsBetweenDates(
     @Param('start') startDate: string,
