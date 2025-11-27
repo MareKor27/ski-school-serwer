@@ -132,7 +132,7 @@ export class ReservationController {
       },
     });
 
-    const url = `http://localhost:5173/administrator/weryfikacja/${token}`;
+    const url = `http://localhost:5173/harmonogram/weryfikacja/${token}`;
 
     const htmlContent = `
 <h1 style="font-family: Arial, sans-serif;">Witaj!</h1>
