@@ -3,13 +3,13 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
+import { AuditService } from 'src/audit/audit-log.service';
 import { BookingReservationModel } from 'src/auth/model/booking-confirmation.model';
 import { ReservationModel } from 'src/reservations/models/reservation.model';
 
 @Injectable()
 export class ReservastionResetCleanupService {
   private readonly logger = new Logger(ReservastionResetCleanupService.name);
-  auditService: any;
 
   constructor(
     @InjectModel(BookingReservationModel)
@@ -18,6 +18,8 @@ export class ReservastionResetCleanupService {
     private readonly appointmentModel: typeof AppointmentModel,
     @InjectModel(ReservationModel)
     private readonly reservationModel: typeof ReservationModel,
+
+    private readonly auditService: AuditService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)

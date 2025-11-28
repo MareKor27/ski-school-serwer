@@ -18,7 +18,7 @@ export class AuditLog extends Model<AuditLog> {
   path: string;
 
   @Column({ type: DataType.INTEGER, allowNull: true })
-  userId: number;
+  userId: number | null;
 
   @Column({ type: DataType.JSONB, allowNull: true })
   body: any;
@@ -28,6 +28,9 @@ export class AuditLog extends Model<AuditLog> {
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
   isError: boolean;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  message: string | null;
 
   @CreatedAt
   createdAt: Date;

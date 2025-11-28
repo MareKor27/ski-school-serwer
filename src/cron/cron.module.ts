@@ -7,6 +7,7 @@ import { ReservastionResetCleanupService } from './reservation-reset-cleanup.ser
 import { BookingReservationModel } from 'src/auth/model/booking-confirmation.model';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
 import { ReservationModel } from 'src/reservations/models/reservation.model';
+import { AuditModule } from 'src/audit/audit.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ReservationModel } from 'src/reservations/models/reservation.model';
       AppointmentModel,
       ReservationModel,
     ]),
+    AuditModule,
   ],
   providers: [PasswordResetCleanupService, ReservastionResetCleanupService],
 })
