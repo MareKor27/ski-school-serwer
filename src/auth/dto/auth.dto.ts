@@ -10,6 +10,10 @@ export class LoginDto {
   @IsString()
   @MinLength(4, { message: 'password must be at least 8 characters long' })
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  recaptchaToken: string;
 }
 
 export class RegisterDto {

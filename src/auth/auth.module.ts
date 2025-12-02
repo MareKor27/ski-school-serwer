@@ -13,6 +13,7 @@ import { BookingReservationModel } from './model/booking-confirmation.model';
 import { UsersService } from 'src/users/users.service';
 import { ReservationService } from 'src/reservations/reservation.service';
 import { ReservationModule } from 'src/reservations/reservation.module';
+import { RecaptchaService } from './recaptcha.service';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { ReservationModule } from 'src/reservations/reservation.module';
     ScheduleModule.forRoot(),
     forwardRef(() => ReservationModule),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RecaptchaService],
   controllers: [AuthController],
   exports: [AuthService],
 })

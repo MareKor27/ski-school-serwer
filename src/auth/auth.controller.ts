@@ -17,28 +17,24 @@ import {
   ResetPasswordDto,
 } from './dto/auth.dto';
 import { Actor } from 'src/commons/provider/actor.decorator';
-import { UserDto } from 'src/users/dto/user.dto';
 import { UserData } from './type/auth';
 import { AuthGuard } from '@nestjs/passport';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { Audit } from 'src/audit/audit-log.decorator';
+import { RecaptchaService } from './recaptcha.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private recaptchaService: RecaptchaService,
+  ) {}
 
   @Post('login')
   @Audit('AUTH-LOGIN_TO_SYSTEM')
   async login(@Body() loginDto: LoginDto) {
-    // await this.authService.log({
-    //   action: 'UPDATE_ORDER_STATUS',
-    //   userId: user.id,
-    //   path: `/orders/${id}/status`,
-    //   body: { from: oldStatus, to: newStatus },
-    //   response: null,
-    //   isError: false,
-    //   message: `Status zmieniony z ${oldStatus} na ${newStatus}`,
-    // });
+    await this.recaptchaService.verifyToken(loginDto.recaptchaToken, 'login');
+
     return this.authService.login(loginDto.email, loginDto.password);
   }
 
