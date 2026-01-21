@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { CronModule } from './cron/cron.module';
 import { AuditModule } from './audit/audit.module';
+import { QuickContactModule } from './quick-contact/quick-contact.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuditModule } from './audit/audit.module';
     AuthModule,
     CronModule,
     AuditModule,
+    QuickContactModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
