@@ -1,5 +1,5 @@
 import { User } from '../models/user.model';
-import { UserDto } from './user.dto';
+import { UserDto, UserPublicDto } from './user.dto';
 
 export function mapUserToDto(user: User): UserDto {
   return {
@@ -9,5 +9,12 @@ export function mapUserToDto(user: User): UserDto {
     role: user.role,
     iconColor: user.iconColor,
     status: user.status,
+  };
+}
+
+export function mapUserstoPublicDto(user: User): UserPublicDto {
+  return {
+    id: user.id,
+    name: user.name,
   };
 }

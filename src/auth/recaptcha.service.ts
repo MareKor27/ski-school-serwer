@@ -15,9 +15,20 @@ export class RecaptchaService {
     const response = await axios.post(url, params);
 
     const data = response.data;
-    // Sprawdzenie minimalnego score i zgodności akcji
-    if (!data.success || data.score < 0.5 || data.action !== action) {
-      throw new UnauthorizedException('Nieprawidłowa reCAPTCHA');
+
+    if (!data.success) {
+      console.log('reCAPTCHA failed:', data['error-codes']);
+      throw new UnauthorizedException('reCAPTCHA failed');
+    }
+
+    if (data.action !== action) {
+      console.log('Invalid reCAPTCHA action:', data['error-codes']);
+      throw new UnauthorizedException('Invalid reCAPTCHA action');
+    }
+
+    if (data.score < 0.5) {
+      console.log('Low reCAPTCHA score:', data.score);
+      throw new UnauthorizedException('Low reCAPTCHA score');
     }
     return true;
   }

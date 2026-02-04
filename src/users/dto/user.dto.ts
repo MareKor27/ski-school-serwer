@@ -11,3 +11,9 @@ export type UserDto = {
 
   status: string;
 };
+
+export type UserPublicDto = {
+  id: number;
+
+  name: string;
+};

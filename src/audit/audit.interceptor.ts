@@ -9,6 +9,8 @@ import { tap, catchError } from 'rxjs/operators';
 import { AuditService } from './audit-log.service';
 import { Reflector } from '@nestjs/core';
 import { AUDIT_KEY } from './audit-log.decorator';
+import { auditBodyProfiles } from './profiles/audit-body-profiles.map';
+import { AuditEvent } from './profiles/audit-body-profile.enum';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -19,33 +21,41 @@ export class AuditInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const handler = context.getHandler();
-    const action = this.reflector.get<string>(AUDIT_KEY, handler);
+    const auditOptions = this.reflector.get<AuditEvent>(AUDIT_KEY, handler);
 
-    if (!action) return next.handle(); // brak dekoratora -> nie logujemy
+    if (!auditOptions) return next.handle(); // brak dekoratora -> nie logujemy
 
     const req = context.switchToHttp().getRequest();
-    const user = req.user; // JWT lub inny mechanizm uwierzytelniania
+    const user = req.user;
     const { method, originalUrl: path, body } = req;
+
+    const config = auditBodyProfiles[auditOptions];
+
+    const sanitizedBody = config.bodyMapper ? config.bodyMapper(body) : body;
 
     return next.handle().pipe(
       tap(async (response) => {
+        const sanitizedResponse = config.responseMapper
+          ? config.responseMapper(response)
+          : response;
+
         await this.auditService.log({
-          action,
+          action: config.action,
           method,
           path,
           userId: user?.id ?? null,
-          body,
-          response,
+          body: sanitizedBody,
+          response: sanitizedResponse,
           isError: false,
         });
       }),
       catchError(async (err) => {
         await this.auditService.log({
-          action,
+          action: config.action,
           method,
           path,
           userId: user?.id ?? null,
-          body,
+          body: sanitizedBody,
           response: { error: err.message },
           isError: true,
         });

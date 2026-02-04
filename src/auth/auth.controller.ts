@@ -12,6 +12,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { buildResponseDto } from 'src/commons/dto/response.dto.mapper';
 import { Audit } from 'src/audit/audit-log.decorator';
 import { RecaptchaService } from './recaptcha.service';
+import { AuditEvent } from 'src/audit/profiles/audit-body-profile.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @Audit('AUTH-LOGIN_TO_SYSTEM')
+  @Audit(AuditEvent.AUTH_LOGIN_TO_SYSTEM)
   async login(@Body() loginDto: LoginDto) {
     await this.recaptchaService.verifyToken(loginDto.recaptchaToken, 'login');
 
@@ -39,7 +40,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @Audit('AUTH-RESET-PASSWORD')
+  @Audit(AuditEvent.AUTH_RESET_PASSWORD)
   async resetPassword(
     @Body()
     resetPasswordDto: ResetPasswordDto,
@@ -57,9 +58,8 @@ export class AuthController {
   }
 
   @Get('verification/:token')
-  @Audit('AUTH-RESERVATION_VERYFICATION')
+  @Audit(AuditEvent.AUTH_RESERVATION_VERIFICATION)
   async reservationVerification(@Param('token') token: string) {
-    console.log('verification/:token');
     const reservation = await this.authService.checkReservation(token);
 
     return buildResponseDto(reservation);

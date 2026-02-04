@@ -54,4 +54,7 @@ export class CreateReservationDto {
 
   @IsString()
   lessonStatus: LessonStatus;
+
+  @IsString()
+  tokenReservation: string;
 }

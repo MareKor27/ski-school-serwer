@@ -224,21 +224,26 @@ export class AuthService {
     });
 
     if (!bookedRegistration) {
-      console.log('empty');
-      return;
-    } // Error?
+      return this.findReservationByToken(token);
+    }
 
     const reservation = await this.reservationService.findOne(
       bookedRegistration.reservationId,
     );
 
-    if (!reservation) return; // Error?
+    if (!reservation) return; //ERROR
 
     reservation.lessonStatus;
 
     reservation.set('lessonStatus', 'verified');
     await reservation.save();
 
+    if (bookedRegistration) await bookedRegistration.destroy();
+
     return reservation;
+  }
+
+  async findReservationByToken(token: string) {
+    return await this.reservationService.findOneByToken(token);
   }
 }

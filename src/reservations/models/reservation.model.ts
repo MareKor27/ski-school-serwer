@@ -70,6 +70,9 @@ export class ReservationModel extends Model<
   })
   lessonStatus: LessonStatus;
 
+  @Column
+  tokenReservation: string;
+
   @HasMany(() => AppointmentModel)
   appointments: AppointmentModel[];
 

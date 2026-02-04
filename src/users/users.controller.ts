@@ -32,6 +32,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles, RolesGuard } from 'src/commons/middleware/roles-guard';
 import { PaginationQueryDto } from 'src/commons/dto/paginationQueryDto.dto';
 import { Audit } from 'src/audit/audit-log.decorator';
+import { AuditEvent } from 'src/audit/profiles/audit-body-profile.enum';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -90,7 +91,7 @@ export class UsersController {
 
   @Patch(':id')
   @Roles('ADMIN', 'INSTRUCTOR')
-  @Audit('USER-UPDATE')
+  @Audit(AuditEvent.USER_UPDATE)
   async updateUser(
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -102,7 +103,7 @@ export class UsersController {
 
   @Delete(':id')
   @Roles('ADMIN')
-  @Audit('USER-DELETE')
+  @Audit(AuditEvent.USER_DELETE)
   async deleteUser(@Param('id') id: number): Promise<ResponseDto<UserDto>> {
     const user = await this.userService.findOneUser(id);
     // const user = await this.userService.delete(id);

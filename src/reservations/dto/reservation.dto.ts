@@ -34,6 +34,8 @@ export type ReservationDto = {
   appointments: AppointmentDto[] | EmptyDto[];
 
   lessonStatus: string;
+
+  reservationToken: string;
 };
 
 export type ReservationBodyDto = {

@@ -1,4 +1,3 @@
-import { mapUserToDto } from 'src/users/dto/user.dto.mapper';
 import { Reservation } from '../models/reservation.model';
 import { ReservationDto } from './reservation.dto';
 import { mapAppointmentToDto } from 'src/appointments/dto/appointment.dto.mapper';
@@ -36,5 +35,6 @@ export function mapReservationToDto(
         : { id: appointment.id },
     ),
     lessonStatus: reservation.lessonStatus,
+    reservationToken: reservation.tokenReservation,
   };
 }

@@ -30,6 +30,7 @@ import { UserDto } from 'src/users/dto/user.dto';
 import { UserData } from 'src/auth/type/auth';
 import { AppointmentRequestBody } from './dto/appointmentRequestBody.dto';
 import { Audit } from 'src/audit/audit-log.decorator';
+import { AuditEvent } from 'src/audit/profiles/audit-body-profile.enum';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -111,10 +112,9 @@ export class AppointmentController {
     return buildCollectionsResponseDto(dto, { page, size, totalRows });
   }
 
-  //Administrator Create apointment for users
-  //ADD GUARD !!!!!!!!!!!!!!!
   @Post('/instructor/:id')
-  @Audit('APPO-ADM_MODIFIES_APPO_FOR_USERS')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Audit(AuditEvent.APPO_ADM_MODIFIES_USERS)
   async createAppointmentForInstructor(
     @Body() createAvailabilityDto: CreateAppointmentDto,
     @Param('id') id: number,
@@ -127,16 +127,13 @@ export class AppointmentController {
     return buildResponseDto(appointment, message);
   }
 
-  //Instructors creates own appointments
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
-  @Audit('APPO-INS_MODIFIES_APPO')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Audit(AuditEvent.APPO_INS_MODIFIES)
   async createAppointment(
     @Body() createAvailabilityDto: CreateAppointmentDto,
     @Actor() user: UserData,
   ) {
-    // console.log(createAvailabilityDto);
-    // console.log(user);
     const appointment = await this.appointmentService.createAppointment(
       user.id,
       createAvailabilityDto.appointmentDate,
@@ -146,7 +143,7 @@ export class AppointmentController {
   }
 
   @Patch(':id')
-  @Audit('APPO-PATCH_APPO')
+  @Audit(AuditEvent.APPO_PATCH)
   async updateAppointment(
     @Param('id') id: number,
     @Body() updateAvailabilityDto: UpdateAppointmentDto,
@@ -160,16 +157,17 @@ export class AppointmentController {
   }
 
   @Delete(':id')
-  @Audit('APPO-DELETE_APPO')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Audit(AuditEvent.APPO_DELETE)
   async deleteAppointment(@Param('id') id: number) {
     const appointment = await this.appointmentService.deleteOne(+id);
-    const message = `Appointment with id:${appointment.id} successfully delate`;
+    const message = `Appointment with id:${appointment.id} successfully deleted`;
     return buildResponseDto(appointment, message);
   }
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post('/generate/day')
-  @Audit('APPO-APPO_BY_DAY')
+  @Audit(AuditEvent.APPO_BY_DAY)
   async setAppointmentsByDay(
     @Body() requestBody: AppointmentRequestBody,
     @Actor() user: UserDto,

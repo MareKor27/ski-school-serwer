@@ -3,7 +3,9 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
+import { Audit } from 'src/audit/audit-log.decorator';
 import { AuditService } from 'src/audit/audit-log.service';
+import { AuditEvent } from 'src/audit/profiles/audit-body-profile.enum';
 import { BookingReservationModel } from 'src/auth/model/booking-confirmation.model';
 import { ReservationModel } from 'src/reservations/models/reservation.model';
 
@@ -23,6 +25,7 @@ export class ReservastionResetCleanupService {
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
+  @Audit(AuditEvent.REMOVE_EXPIRED_TOKENS)
   async cleanupEveryMinute() {
     this.logger.log('Czyszczenie wygasłych linków z rezerwacji');
     const now = new Date();
@@ -45,7 +48,7 @@ export class ReservastionResetCleanupService {
     console.log(reservationIds);
 
     await this.auditService.log({
-      action: 'REMOVAL OF EXPIRED TOKENS',
+      action: 'REMOVE_EXPIRED_TOKENS',
       userId: null,
       path: ``,
       body: { reservationId: reservationIds },

@@ -11,7 +11,7 @@ import { AppointmentService } from 'src/appointments/appointment.service';
 import { AppointmentModel } from 'src/appointments/models/appointment.model';
 import { ReservationBodyDto } from './dto/reservation.dto';
 import { UserData } from 'src/auth/type/auth';
-import { Op, Order, WhereOptions } from 'sequelize';
+import { Op, Order, where, WhereOptions } from 'sequelize';
 import { FilterModel } from 'src/commons/types/FilterModel';
 
 import { PaginationQueryDto } from 'src/commons/dto/paginationQueryDto.dto';
@@ -42,6 +42,26 @@ export class ReservationService {
     return this.reservationModel.findOne({
       where: {
         id,
+      },
+      include: [
+        {
+          model: this.appointmentRepository,
+          required: true,
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
+          order: [['date', 'ASC']],
+        },
+      ],
+    });
+  }
+
+  findOneByToken(token: string) {
+    return this.reservationModel.findOne({
+      where: {
+        tokenReservation: token,
       },
       include: [
         {

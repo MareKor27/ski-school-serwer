@@ -35,6 +35,7 @@ import * as nodemailer from 'nodemailer';
 import { ReservationModel } from './models/reservation.model';
 import { AuthService } from 'src/auth/auth.service';
 import { Audit } from 'src/audit/audit-log.decorator';
+import { AuditEvent } from 'src/audit/profiles/audit-body-profile.enum';
 
 @Controller('reservation')
 export class ReservationController {
@@ -97,7 +98,7 @@ export class ReservationController {
   //   }),
   // )
   @Post()
-  @Audit('RESERVATION-CREATE')
+  @Audit(AuditEvent.RESERVATION_CREATE)
   async createReservation(@Body() reservationBodyDto: ReservationBodyDto) {
     const reservation =
       await this.reservationService.createOne(reservationBodyDto);
@@ -115,6 +116,10 @@ export class ReservationController {
       const reservationToken = await this.authService.reservationToken(
         reservationWithAllData,
       );
+
+      reservation.set('tokenReservation', reservationToken);
+      await reservation.save();
+
       await this.sendEmail(reservationWithAllData, reservationToken);
     }
 
@@ -196,7 +201,7 @@ export class ReservationController {
   }
 
   @Delete(':id')
-  @Audit('RESERVATION-DELETE')
+  @Audit(AuditEvent.RESERVATION_DELETE)
   async deleteReservation(@Param('id') id: number) {
     const reservation = await this.reservationService.deleteOne(+id);
     const message = ``; //Reservations with id:${reservation.id} successfully delate`;
