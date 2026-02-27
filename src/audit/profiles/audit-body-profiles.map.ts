@@ -8,7 +8,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       email: body.email,
     }),
     responseMapper: (response) => ({
-      id: response.user.id,
+      instructorId: response.user.id,
       email: response.user.email,
     }),
   },
@@ -21,7 +21,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       iconColor: body.iconColor,
     }),
     responseMapper: (response) => ({
-      id: response.content.id,
+      instructorId: response.content.id,
       name: response.content.name,
       email: response.content.email,
       iconColor: response.content.iconColor,
@@ -31,7 +31,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
   [AuditEvent.USER_DELETE]: {
     action: 'USER_DELETE',
     bodyMapper: (body) => ({
-      id: body.id,
+      instructorId: body.id,
       name: body.name,
     }),
   },
@@ -39,7 +39,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
   [AuditEvent.AUTH_RESET_PASSWORD]: {
     action: 'AUTH_RESET_PASSWORD',
     bodyMapper: (body) => ({
-      id: body.id,
+      instructorId: body.id,
       name: body.name,
       email: body.email,
     }),
@@ -70,7 +70,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       additionalComments: response.content.additionalComments,
       insuranceInformation: response.content.insuranceInformation,
       appointments: response.content.appointments.map((a) => ({
-        id: a.id,
+        appointmentId: a.id,
         appointmentDate: a.appointmentDate,
         instructorId: a.instructorId,
       })),
@@ -80,7 +80,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
   [AuditEvent.RESERVATION_DELETE]: {
     action: 'RESERVATION_DELETE',
     bodyMapper: (body) => ({
-      id: body.id,
+      reservationId: body.id,
     }),
   },
   [AuditEvent.AUTH_RESERVATION_VERIFICATION]: {
@@ -97,9 +97,10 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       additionalComments: response.content.additionalComments,
       insuranceInformation: response.content.insuranceInformation,
       appointments: response.content.appointments.map((a) => ({
-        id: a.id,
+        appointmentId: a.id,
         appointmentDate: a.appointmentDate,
         instructorId: a.instructorId,
+        instructorName: response.content.instructor.name,
       })),
     }),
   },
@@ -118,8 +119,9 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       appointmentDate: body.appointmentDate,
     }),
     responseMapper: (response) => ({
-      id: response.content.id,
-      instructorId: response.content.instructorId,
+      appointmentId: response.content.id,
+      instructorId: response.content.instructor.id,
+      instructorName: response.content.instructor.name,
       appointmentDate: response.content.appointmentDate,
       message: response.message,
     }),
@@ -129,8 +131,9 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
     action: 'APPO_INS_MODIFIES',
     bodyMapper: (body) => ({ appointmentDate: body.appointmentDate }),
     responseMapper: (response) => ({
-      id: response.content.id,
-      instructorId: response.content.instructorId,
+      appointmentId: response.content.id,
+      instructorId: response.content.instructor.id,
+      instructorName: response.content.instructor.name,
       appointmentDate: response.content.appointmentDate,
     }),
   },
@@ -146,7 +149,7 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
       massage: 'Appointment deletion requested',
     }),
     responseMapper: (response) => ({
-      id: response.content.id,
+      appointmentId: response.content.id,
       instructorId: response.content.instructor.id,
       instructorName: response.content.instructor.name,
       appointmentDate: response.content.appointmentDate,
@@ -159,6 +162,10 @@ export const auditBodyProfiles: Record<AuditEvent, AuditEventConfig> = {
     bodyMapper: (body) => ({
       checked: body.checked,
       chosenDate: body.chosenDate,
+    }),
+    responseMapper: (response) => ({
+      instructorName: response.content.name,
+      instructorId: response.content.id,
     }),
   },
 

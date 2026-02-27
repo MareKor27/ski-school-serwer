@@ -12,12 +12,15 @@ import { UserData } from 'src/auth/type/auth';
 import { UserDto } from 'src/users/dto/user.dto';
 import { AppointmentRequestBody } from './dto/appointmentRequestBody.dto';
 import { DateTime } from 'luxon';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AppointmentService {
   constructor(
     @InjectModel(AppointmentModel)
     private appointmentModel: typeof AppointmentModel,
+
+    private userService: UsersService,
   ) {}
 
   findAppointmentById(id: number): Promise<AppointmentModel | null> {
@@ -300,6 +303,7 @@ export class AppointmentService {
         await this.deleteOneByDateAndUser(affectedUserId, localDate.toJSDate());
       }
     }
+    return this.userService.findOneUser(userId);
   }
 
   async deleteOne(id: number): Promise<AppointmentModel> {

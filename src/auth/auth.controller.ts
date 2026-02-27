@@ -22,7 +22,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @Audit(AuditEvent.AUTH_LOGIN_TO_SYSTEM)
+  // @Audit(AuditEvent.AUTH_LOGIN_TO_SYSTEM)
   async login(@Body() loginDto: LoginDto) {
     await this.recaptchaService.verifyToken(loginDto.recaptchaToken, 'login');
 

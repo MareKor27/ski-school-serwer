@@ -19,7 +19,6 @@ import { mapFilterToSequelizeWhere } from 'src/commons/servis/convertFilter';
 
 import { UserModel } from 'src/users/models/user.model';
 import { mapSortToSequelizeOrder } from 'src/commons/servis/convertSort';
-import { mapReservationToDto } from './dto/reservation.dto.mapper';
 
 const SERVER_OPTION_MAX_LESSON_TIME = 3;
 

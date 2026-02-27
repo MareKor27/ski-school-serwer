@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -119,11 +120,19 @@ export class AppointmentController {
     @Body() createAvailabilityDto: CreateAppointmentDto,
     @Param('id') id: number,
   ) {
-    const appointment = await this.appointmentService.createAppointment(
+    const app = await this.appointmentService.createAppointment(
       id,
       createAvailabilityDto.appointmentDate,
     );
-    const message = `Appointment with id:${appointment.id} successfully created`;
+
+    const appointment = await this.appointmentService.findAppointmentById(
+      app.id,
+    );
+
+    if (!appointment)
+      throw new NotFoundException(`Reservation with id ${id} not found`);
+    const message = `Appointment successfully created`;
+
     return buildResponseDto(appointment, message);
   }
 
@@ -134,11 +143,17 @@ export class AppointmentController {
     @Body() createAvailabilityDto: CreateAppointmentDto,
     @Actor() user: UserData,
   ) {
-    const appointment = await this.appointmentService.createAppointment(
+    const app = await this.appointmentService.createAppointment(
       user.id,
       createAvailabilityDto.appointmentDate,
     );
-    const message = `Appointment with id:${appointment.id} successfully created`;
+    const appointment = await this.appointmentService.findAppointmentById(
+      app.id,
+    );
+
+    if (!appointment)
+      throw new NotFoundException(`Appointment with id ${app.id} not found`);
+    const message = `Appointment successfully created`;
     return buildResponseDto(appointment, message);
   }
 
@@ -153,6 +168,7 @@ export class AppointmentController {
       updateAvailabilityDto,
     );
     const message = `Appointment with id:${appointment.id} successfully updated`;
+
     return buildResponseDto(appointment, message);
   }
 
@@ -173,10 +189,22 @@ export class AppointmentController {
     @Actor() user: UserDto,
     @Query('user') userId: number,
   ) {
-    await this.appointmentService.createFewAppointmentsOnOneDay(
-      requestBody,
-      user,
-      userId,
-    );
+    try {
+      const changedUser =
+        await this.appointmentService.createFewAppointmentsOnOneDay(
+          requestBody,
+          user,
+          userId,
+        );
+      if (!changedUser) {
+        throw new Error('User not found');
+      }
+      return buildResponseDto(
+        { id: changedUser.id, name: changedUser.name },
+        'Successfully generated appointments',
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

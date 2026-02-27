@@ -32,7 +32,14 @@ export class AuditInterceptor implements NestInterceptor {
     const config = auditBodyProfiles[auditOptions];
 
     const sanitizedBody = config.bodyMapper ? config.bodyMapper(body) : body;
-
+    console.log(user);
+    const sanitizedUser = user
+      ? {
+          instructorId: user.id,
+          name: user.name,
+        }
+      : null;
+    console.log(sanitizedUser);
     return next.handle().pipe(
       tap(async (response) => {
         const sanitizedResponse = config.responseMapper
@@ -43,7 +50,7 @@ export class AuditInterceptor implements NestInterceptor {
           action: config.action,
           method,
           path,
-          userId: user?.id ?? null,
+          userId: sanitizedUser,
           body: sanitizedBody,
           response: sanitizedResponse,
           isError: false,
@@ -54,7 +61,7 @@ export class AuditInterceptor implements NestInterceptor {
           action: config.action,
           method,
           path,
-          userId: user?.id ?? null,
+          userId: sanitizedUser,
           body: sanitizedBody,
           response: { error: err.message },
           isError: true,

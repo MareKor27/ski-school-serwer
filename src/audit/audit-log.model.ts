@@ -7,7 +7,7 @@ import {
 } from 'sequelize-typescript';
 
 @Table({ tableName: 'audit_log' })
-export class AuditLog extends Model<AuditLog> {
+export class AuditLogModel extends Model<AuditLogModel> {
   @Column({ type: DataType.STRING })
   action: string;
 
@@ -17,8 +17,8 @@ export class AuditLog extends Model<AuditLog> {
   @Column({ type: DataType.STRING })
   path: string;
 
-  @Column({ type: DataType.INTEGER, allowNull: true })
-  userId: number | null;
+  @Column({ type: DataType.JSONB, allowNull: true })
+  userId: any | null;
 
   @Column({ type: DataType.JSONB, allowNull: true })
   body: any;
